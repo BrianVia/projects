@@ -1,19 +1,26 @@
 {
   "projectType": "application",
   "sourceRoot": "apps/user-ui/src",
-  "prefix": "angular-tailwind-nx",
+  "prefix": "wordly-domains",
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/user-ui",
         "index": "apps/user-ui/src/index.html",
         "main": "apps/user-ui/src/main.ts",
         "polyfills": "apps/user-ui/src/polyfills.ts",
         "tsConfig": "apps/user-ui/tsconfig.app.json",
-        "assets": ["apps/user-ui/src/favicon.ico", "apps/user-ui/src/assets"],
-        "styles": ["apps/user-ui/src/styles.css"],
+        "assets": [
+          "apps/user-ui/src/favicon.ico",
+          "apps/user-ui/src/assets"
+        ],
+        "styles": [
+          "apps/user-ui/src/styles.css"
+        ],
         "scripts": []
       },
       "configurations": {
@@ -70,12 +77,17 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["apps/user-ui/**/*.ts", "apps/user-ui/**/*.html"]
+        "lintFilePatterns": [
+          "apps/user-ui/**/*.ts",
+          "apps/user-ui/**/*.html"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/user-ui"],
+      "outputs": [
+        "coverage/apps/user-ui"
+      ],
       "options": {
         "jestConfig": "apps/user-ui/jest.config.ts",
         "passWithNoTests": true

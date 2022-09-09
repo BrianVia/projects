@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "angular-tailwind-nx",
+            "prefix": "user-ui",
             "style": "kebab-case"
           }
         ]

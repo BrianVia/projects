@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "angular-tailwind-nx",
+  "npmScope": "wordly-domains",
   "affected": {
     "defaultBase": "main"
   },
