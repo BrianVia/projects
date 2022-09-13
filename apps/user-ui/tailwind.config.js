@@ -1,11 +1,5 @@
-const { createGlobPatternsForDependencies } = require('@nrwl/angular/tailwind');
-const { join } = require('path');
-
 module.exports = {
-  content: [
-    join(__dirname, 'src/**/!(*.stories|*.spec).{ts,html}'),
-    ...createGlobPatternsForDependencies(__dirname),
-  ],
+  content: ['./src/**/*.{html,ts}'],
   theme: {
     colors: {
       primary: {
@@ -28,5 +22,5 @@ module.exports = {
       xl: '2rem',
     },
   },
-  plugins: [],
+  plugins: [''],
 };
