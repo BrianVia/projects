@@ -5,6 +5,8 @@ import { AppComponent } from './app.component';
 import { NxWelcomeComponent } from './nx-welcome.component';
 import { AuthComponent } from './shared/components/auth/auth.component';
 import { AccountComponent } from './shared/components/account/account.component';
+import { FooterComponent } from './shared/components/footer/footer.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -12,8 +14,9 @@ import { AccountComponent } from './shared/components/account/account.component'
     NxWelcomeComponent,
     AuthComponent,
     AccountComponent,
+    FooterComponent,
   ],
-  imports: [BrowserModule],
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule],
   providers: [],
   bootstrap: [AppComponent],
 })

@@ -1,26 +1,16 @@
 <div class="form-widget">
-  <div>
+  <form [formGroup]="wordPreferencesForm">
     <label for="email">Email</label>
     <input id="email" type="text" [value]="session?.user?.email" disabled />
-  </div>
-  <div>
-    <label for="username">Name</label>
-    <input
-      #username
-      id="username"
-      type="text"
-      [value]="profile?.username ?? ''"
-    />
-  </div>
-  <div>
-    <label for="website">Website</label>
-    <input #website id="website" type="url" [value]="profile?.website ?? ''" />
-  </div>
+    <label for="wordPreferences">Word Preferences (comma separated list)</label>
+    <input id="wordPreferences" type="text" formControlName="wordPreferences" />
+  </form>
+  <div></div>
 
   <div>
     <button
       class="button primary block"
-      (click)="updateProfile(username.value, website.value)"
+      (click)="this.onSubmit()"
       [disabled]="loading"
     >
       {{ loading ? 'Loading ...' : 'Update' }}

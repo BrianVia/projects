@@ -8,9 +8,9 @@ import {
 import { environment } from '../../../environments/environment';
 
 export interface Profile {
-  username: string;
-  website: string;
-  avatar_url: string;
+  email: string | null;
+  active_subscription: boolean;
+  word_preferences: string[];
 }
 
 @Injectable({
@@ -38,8 +38,8 @@ export class SupabaseService {
 
   get profile() {
     return this.supabase
-      .from('user_profiles')
-      .select(`word_preferences, active_subscription`)
+      .from('profiles')
+      .select(`email, word_preferences, active_subscription`)
       .eq('id', this.user?.id)
       .single();
   }
@@ -58,14 +58,14 @@ export class SupabaseService {
     return this.supabase.auth.signOut();
   }
 
-  updateProfile(profile: Profile) {
+  updateWordPreferences(wordPreferences: string[]) {
+    console.log(wordPreferences);
     const update = {
-      ...profile,
+      word_preferences: wordPreferences,
       id: this.user?.id,
-      updated_at: new Date(),
     };
 
-    return this.supabase.from('user_profiles').upsert(update, {
+    return this.supabase.from('profiles').upsert(update, {
       returning: 'minimal', // Don't return the value after inserting
     });
   }

@@ -6,14 +6,15 @@
   <main
     class="max-w-xl md:max-w-2xl lg:max-w-6xl mx-auto py-xl px-md md:px-xl grid grid-cols-1 gap-md md:grid-cols-2 lg:grid-cols-3"
   >
-    <div class="container" style="padding: 50px 0 100px 0">
+    <div class="container" style="padding: 50px 0 100px 0" class="bg-red-500">
       <user-ui-account
         *ngIf="session; else auth"
         [session]="session"
       ></user-ui-account>
-      <ng-template #auth>
+      <ng-template #auth class="bg-red-500">
         <user-ui-auth></user-ui-auth>
       </ng-template>
     </div>
   </main>
+  <user-ui-footer></user-ui-footer>
 </div>
