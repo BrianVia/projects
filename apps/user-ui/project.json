@@ -14,12 +14,13 @@
         "main": "apps/user-ui/src/main.ts",
         "polyfills": "apps/user-ui/src/polyfills.ts",
         "tsConfig": "apps/user-ui/tsconfig.app.json",
+        "inlineStyleLanguage": "sass",
         "assets": [
           "apps/user-ui/src/favicon.ico",
           "apps/user-ui/src/assets"
         ],
         "styles": [
-          "apps/user-ui/src/styles.css"
+          "apps/user-ui/src/styles.sass"
         ],
         "scripts": []
       },
