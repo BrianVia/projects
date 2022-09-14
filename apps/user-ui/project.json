@@ -20,7 +20,7 @@
           "apps/user-ui/src/assets"
         ],
         "styles": [
-          "apps/user-ui/src/styles.sass"
+          "apps/user-ui/src/styles.css"
         ],
         "scripts": []
       },

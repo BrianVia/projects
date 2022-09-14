@@ -1,7 +1,13 @@
-<div class="form-widget">
+<div class="form-widget bg-primary w-16 md:w-32 lg:w-48 xl:w-64">
+  <h1 class="text-3xl font-bold underline dark:xl:hover:bg-fuchsia-600">
+    Hello world!
+  </h1>
   <form [formGroup]="wordPreferencesForm">
-    <label for="email">Email</label>
-    <input id="email" type="text" [value]="session?.user?.email" disabled />
+    <div class="p-12 m-16">
+      <label for="email">Email</label>
+      <input id="email" type="text" [value]="session?.user?.email" disabled />
+      <br />
+    </div>
     <label for="wordPreferences">Word Preferences (comma separated list)</label>
     <input id="wordPreferences" type="text" formControlName="wordPreferences" />
   </form>
