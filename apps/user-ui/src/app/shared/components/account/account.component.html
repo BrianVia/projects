@@ -1,21 +1,31 @@
-<div class="form-widget bg-primary w-16 md:w-32 lg:w-48 xl:w-64">
-  <h1 class="text-3xl font-bold underline dark:xl:hover:bg-fuchsia-600">
-    Hello world!
-  </h1>
-  <form [formGroup]="wordPreferencesForm">
-    <div class="p-12 m-16">
+<div class="form-widget bg-grey w-full">
+  <form [formGroup]="wordPreferencesForm" class="w-full px-sm py-md">
+    <div class="w-full">
       <label for="email">Email</label>
-      <input id="email" type="text" [value]="session?.user?.email" disabled />
+      <br />
+      <input
+        id="email"
+        type="text"
+        [value]="session?.user?.email"
+        disabled
+        class="min-w-full"
+      />
       <br />
     </div>
     <label for="wordPreferences">Word Preferences (comma separated list)</label>
-    <input id="wordPreferences" type="text" formControlName="wordPreferences" />
+    <br />
+    <input
+      id="wordPreferences"
+      type="text"
+      formControlName="wordPreferences"
+      class="min-w-full"
+    />
   </form>
   <div></div>
 
   <div>
     <button
-      class="button primary block"
+      class="px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
       (click)="this.onSubmit()"
       [disabled]="loading"
     >
