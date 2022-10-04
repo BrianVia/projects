@@ -1,0 +1,1 @@
+export { WORDS } from './words';
