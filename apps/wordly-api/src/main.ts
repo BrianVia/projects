@@ -18,7 +18,7 @@ console.log(process.env);
 const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
-const port = process.env.port || 3333;
+const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   console.info(`Listening at http://localhost:${port}/api`);
 });
