@@ -7,24 +7,23 @@ import { sleep } from '../utilities';
 import 'dotenv/config';
 
 export async function sendEmails() {
+  console.info('INFO: sendEmails()');
   // const users = await getUsers();
   const profiles = await getUserProfiles();
 
   const availableDomains = await getAvailableDomains();
   const sendGridMailService: MailService = new MailService();
-  sendGridMailService.setApiKey(
-    process.env.SENDGRID_API_KEY || `no-api-key-provided`
-  );
-  console.log(sendGridMailService);
 
   profiles.forEach((profile) => {
     const userDomains = getUserDomains(
       profile.word_preferences,
       availableDomains
     );
-    console.log(`found domains for ${profile.email}: ${userDomains.length}`);
+    console.debug(
+      `DEBUG: Found domains for ${profile.email}: ${userDomains.length}`
+    );
     if (userDomains.length > 0) {
-      console.log(`sending email to ${profile.email}`);
+      console.debug(`DEBUG: Sending email to ${profile.email}`);
       (async () => {
         try {
           sendGridMailService.send(
@@ -53,18 +52,9 @@ export async function sendEmails() {
       })();
     }
   });
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'Emails sent',
-      },
-      null,
-      2
-    ),
-  };
+
   return new Promise((resolve) => {
-    resolve(response);
+    resolve("INFO: Sent emails to users' email addresses");
   });
 }
 

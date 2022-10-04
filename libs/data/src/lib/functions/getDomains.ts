@@ -4,6 +4,8 @@ import { ParkIOAPIResponse, ParkIODomain, Domain } from '../interfaces';
 import { supabase } from '../services';
 import { WORDS } from '../data';
 
+const LOG_LEVEL = process.env.LOG_LEVEL || 'INFO';
+
 export async function getDomains() {
   const domains = await getParkIODomains()
     .then((data: ParkIOAPIResponse) => {
@@ -48,8 +50,15 @@ async function loadDomain(domain: ParkIODomain, supabase: SupabaseClient) {
       returning: 'minimal',
     }
   );
-  console.debug(`loaded domain ${domain.name}`);
-  console.debug(`subwords: ${subwords}`);
+  if (data) {
+    if (LOG_LEVEL === 'DEBUG') {
+      console.debug(`loaded domain ${domain.name}`);
+      console.debug(`subwords: ${subwords}`);
+    }
+  }
+  if (error) {
+    console.error(error);
+  }
 
   return Promise.resolve(true);
 }
