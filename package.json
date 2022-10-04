@@ -8,7 +8,7 @@
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
-    "start-server": "npx nx serve wordly-domains --prod"
+    "start-server": "npx nx serve wordly-api --prod"
   },
   "private": true,
   "dependencies": {
