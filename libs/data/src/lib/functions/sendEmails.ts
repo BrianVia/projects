@@ -13,6 +13,9 @@ export async function sendEmails() {
 
   const availableDomains = await getAvailableDomains();
   const sendGridMailService: MailService = new MailService();
+  sendGridMailService.setApiKey(
+    process.env.SENDGRID_API_KEY || 'NO-KEY-PROVIDED'
+  );
 
   profiles.forEach((profile) => {
     const userDomains = getUserDomains(
