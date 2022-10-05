@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@wordly-domains/data": ["libs/data/src/index.ts"]
+      "@wordly-domains/data": ["libs/data/src/index.ts"],
+      "@wordly-domains/logger": ["libs/logger/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,19 +1,21 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
+import { Logger } from '@wordly-domains/logger';
 import { ParkIOAPIResponse, ParkIODomain, Domain } from '../interfaces';
 import { supabase } from '../services';
 import { WORDS } from '../data';
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'INFO';
+const logger = new Logger();
 
 export async function getDomains() {
   const domains = await getParkIODomains()
     .then((data: ParkIOAPIResponse) => {
-      console.log(`retrieved ${data.domains.length} domains`);
+      logger.log(`retrieved ${data.domains.length} domains`);
       return data.domains;
     })
     .catch((err) => {
-      console.error(err);
+      logger.error(err);
       return Promise.reject('could not fetch domains from Park.IO');
     });
 
@@ -52,12 +54,12 @@ async function loadDomain(domain: ParkIODomain, supabase: SupabaseClient) {
   );
   if (data) {
     if (LOG_LEVEL === 'DEBUG') {
-      console.debug(`loaded domain ${domain.name}`);
-      console.debug(`subwords: ${subwords}`);
+      logger.debug(`loaded domain ${domain.name}`);
+      logger.debug(`subwords: ${subwords}`);
     }
   }
   if (error) {
-    console.error(error);
+    logger.error(error.toString());
   }
 
   return Promise.resolve(true);

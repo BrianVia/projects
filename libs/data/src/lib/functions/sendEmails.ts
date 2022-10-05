@@ -5,9 +5,12 @@ import { supabase } from '../services';
 
 import { sleep } from '../utilities';
 import 'dotenv/config';
+import { Logger } from '@wordly-domains/logger';
+
+const logger = new Logger();
 
 export async function sendEmails() {
-  console.info('INFO: sendEmails()');
+  logger.info('Sending emails');
   // const users = await getUsers();
   const profiles = await getUserProfiles();
 
@@ -22,11 +25,9 @@ export async function sendEmails() {
       profile.word_preferences,
       availableDomains
     );
-    console.debug(
-      `DEBUG: Found domains for ${profile.email}: ${userDomains.length}`
-    );
+    logger.debug(`Found domains for ${profile.email}: ${userDomains.length}`);
     if (userDomains.length > 0) {
-      console.debug(`DEBUG: Sending email to ${profile.email}`);
+      logger.debug(`Sending email to ${profile.email}`);
       (async () => {
         try {
           sendGridMailService.send(
@@ -41,15 +42,15 @@ export async function sendEmails() {
             false,
             (error, result) => {
               if (error) {
-                console.error(error);
+                logger.error(error.toString());
               } else {
-                console.log(result);
+                logger.debug(result.toString());
               }
             }
           );
         } catch (error) {
           if (error.response) {
-            console.error(error.response.body);
+            logger.error(error.response.body);
           }
         }
       })();
@@ -81,8 +82,8 @@ async function getUsers() {
 
 async function getAvailableDomains() {
   const availableDomains: Domain[] = [];
-  console.debug('DEBUG: getAvailableDomains()');
-  console.debug('DEBUG: querying domains table');
+  logger.debug('getAvailableDomains()');
+  logger.debug('querying domains table');
   for (let i = 0; i < 4; i++) {
     const { data, error, status } = await supabase
       .from<Domain>('domains')
@@ -93,7 +94,7 @@ async function getAvailableDomains() {
     availableDomains.push(...(data || []));
   }
 
-  console.debug(`Retrieved ${availableDomains.length} domains from DB`);
+  logger.debug(`Retrieved ${availableDomains.length} domains from DB`);
   return availableDomains;
 }
 
