@@ -11,8 +11,8 @@ const logger = new Logger();
 
 export async function sendEmails() {
   logger.info('Sending emails');
-  // const users = await getUsers();
-  const profiles = await getUserProfiles();
+  const users = await getUsers();
+  const profileDataMap = await getUserProfiles();
 
   const availableDomains = await getAvailableDomains();
   const sendGridMailService: MailService = new MailService();
@@ -20,20 +20,21 @@ export async function sendEmails() {
     process.env.SENDGRID_API_KEY || 'NO-KEY-PROVIDED'
   );
 
-  profiles.forEach((profile) => {
+  users.forEach(({ email, id }) => {
+    const profile = profileDataMap.get(id);
     const userDomains = getUserDomains(
       profile.word_preferences,
       availableDomains
     );
-    logger.debug(`Found domains for ${profile.email}: ${userDomains.length}`);
+    logger.debug(`Found domains for ${email}: ${userDomains.length}`);
     if (userDomains.length > 0) {
-      logger.debug(`Sending email to ${profile.email}`);
+      logger.debug(`Sending email to ${email}`);
       (async () => {
         try {
           sendGridMailService.send(
             {
               from: 'delivery@wordly.domains',
-              to: profile.email,
+              to: email,
               subject: `Domains coming soon you may want - ${new Date()
                 .toISOString()
                 .replace(/T.*/, '')}`,
@@ -62,11 +63,15 @@ export async function sendEmails() {
   });
 }
 
-async function getUserProfiles(): Promise<Profile[]> {
+async function getUserProfiles(): Promise<Map<string, Profile>> {
   const { data, error } = await supabase
     .from<Profile>('profiles')
-    .select('email, word_preferences,active_subscription');
-  return data || [];
+    .select('id, word_preferences,active_subscription');
+  const userProfileMap = new Map<string, Profile>();
+  data.forEach((profile: Profile) => {
+    userProfileMap.set(profile.id, profile);
+  });
+  return userProfileMap;
 }
 
 async function getUsers() {
