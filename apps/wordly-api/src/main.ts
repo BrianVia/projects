@@ -20,7 +20,7 @@ const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
 app.use('/api/v1/user', userRouter);
-
+sendEmails();
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   logger.info(`Listening at http://localhost:${port}/api`);
