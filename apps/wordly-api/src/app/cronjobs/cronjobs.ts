@@ -3,13 +3,13 @@ import { cleanDomains, getDomains, sendEmails } from '@wordly-domains/data';
 
 export class cronjobs {
   scheduleJobs() {
-    cron.schedule('30 6 * * 1,3,5', () => {
+    cron.schedule('30 11 * * 1,3,5', () => {
       sendEmails();
     });
-    cron.schedule('0 0 * * *', () => {
+    cron.schedule('0 5 * * *', () => {
       getDomains();
     });
-    cron.schedule('15 0 * * *', () => {
+    cron.schedule('15 5 * * *', () => {
       cleanDomains();
     });
   }
