@@ -8,6 +8,8 @@ import { AccountComponent } from './shared/components/account/account.component'
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NavigationComponent } from './shared/components/navigation/navigation.component';
+import { httpInterceptorProviders } from './shared/interceptors';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -17,8 +19,8 @@ import { NavigationComponent } from './shared/components/navigation/navigation.c
     FooterComponent,
     NavigationComponent,
   ],
-  imports: [BrowserModule, FormsModule, ReactiveFormsModule],
-  providers: [],
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+  providers: [httpInterceptorProviders],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
