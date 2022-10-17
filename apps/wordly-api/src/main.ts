@@ -11,9 +11,24 @@ import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
 import { sendEmails } from '@wordly-domains/email';
-
+const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains'];
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin
+      // (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          'The CORS policy for this site does not ' +
+          'allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
 const logger = new Logger();
 
 logger.debug(JSON.stringify(process.env));
