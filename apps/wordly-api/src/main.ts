@@ -5,6 +5,8 @@
 
 import * as express from 'express';
 import * as cors from 'cors';
+import * as cookieParser from 'cookie-parser';
+
 import 'dotenv/config';
 
 import { cronjobs } from './app/cronjobs/cronjobs';
@@ -13,6 +15,7 @@ import { userRouter } from './app/api/user';
 import { sendEmails } from '@wordly-domains/email';
 const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains'];
 const app = express();
+app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -30,8 +33,6 @@ app.use(
   })
 );
 const logger = new Logger();
-
-logger.debug(JSON.stringify(process.env));
 
 const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
