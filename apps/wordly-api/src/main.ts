@@ -21,7 +21,6 @@ logger.debug(JSON.stringify(process.env));
 const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
-sendEmails();
 app.use('/api/v1/user', userRouter);
 
 const port = process.env.PORT || 8080;
