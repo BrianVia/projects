@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { SupabaseService } from './shared/services/supabase.service';
-import { WordlyService } from './shared/services/wordly/wordly.service';
 
 @Component({
   selector: 'user-ui-root',
@@ -11,10 +10,7 @@ export class AppComponent implements OnInit {
   title = 'Wordly Domains';
   session = this.supabase.session;
 
-  constructor(
-    private readonly supabase: SupabaseService,
-    private wordlyService: WordlyService
-  ) {}
+  constructor(private readonly supabase: SupabaseService) {}
 
   ngOnInit() {
     this.supabase.authChanges((_, session) => (this.session = session));

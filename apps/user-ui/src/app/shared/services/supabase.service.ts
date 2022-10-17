@@ -35,7 +35,14 @@ export class SupabaseService {
   }
 
   signIn(email: string) {
-    return this.supabase.auth.signIn({ email });
+    return this.supabase.auth.signIn(
+      { email },
+      {
+        redirectTo: environment.production
+          ? 'https://wordly.domains/'
+          : 'http://localhost:4200',
+      }
+    );
   }
 
   signOut() {

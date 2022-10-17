@@ -13,7 +13,7 @@ import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
 import { sendEmails } from '@wordly-domains/email';
-const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains'];
+const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains/'];
 const app = express();
 app.use(cookieParser());
 app.use(
