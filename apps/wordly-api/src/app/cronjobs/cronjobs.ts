@@ -1,5 +1,6 @@
 import * as cron from 'node-cron';
-import { cleanDomains, getDomains, sendEmails } from '@wordly-domains/data';
+import { cleanDomains, getDomains } from '@wordly-domains/data';
+import { sendEmails } from '@wordly-domains/email';
 
 export class cronjobs {
   scheduleJobs() {

@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "data": "libs/data",
+    "email": "libs/email",
     "logger": "libs/logger",
     "user-ui": "apps/user-ui",
     "user-ui-e2e": "apps/user-ui-e2e",

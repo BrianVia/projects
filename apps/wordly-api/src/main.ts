@@ -10,7 +10,7 @@ import 'dotenv/config';
 import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
-import { sendEmails } from '@wordly-domains/data';
+import { sendEmails } from '@wordly-domains/email';
 
 const app = express();
 app.use(cors());
@@ -21,6 +21,7 @@ logger.debug(JSON.stringify(process.env));
 const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
+sendEmails();
 app.use('/api/v1/user', userRouter);
 
 const port = process.env.PORT || 8080;

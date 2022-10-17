@@ -1,11 +1,12 @@
 import { MailService } from '@sendgrid/mail';
-import { Domain } from '../interfaces';
-import { Profile } from '../interfaces';
-import { supabase } from '../services';
+import { Domain } from '@wordly-domains/data';
+import { Profile } from '@wordly-domains/data';
+import { supabase } from '@wordly-domains/data';
 
-import { sleep } from '../utilities';
+import { sleep } from '@wordly-domains/data';
 import 'dotenv/config';
 import { Logger } from '@wordly-domains/logger';
+import { generateEmail } from './email';
 
 const logger = new Logger();
 
@@ -27,28 +28,38 @@ export async function sendEmails() {
       availableDomains
     );
     logger.debug(`Found domains for ${email}: ${userDomains.length}`);
-    if (userDomains.length > 0) {
+    if (userDomains.length > 0 && profile.active_subscription) {
       logger.debug(`Sending email to ${email}`);
       (async () => {
         try {
-          sendGridMailService.send(
-            {
-              from: 'delivery@wordly.domains',
-              to: email,
-              subject: `Domains coming soon you may want - ${new Date()
-                .toISOString()
-                .replace(/T.*/, '')}`,
-              text: userDomains.map((domain) => domain.name).join(', \n'),
-            },
-            false,
-            (error, result) => {
-              if (error) {
-                logger.error(error.toString());
-              } else {
-                logger.debug(result.toString());
+          const emailText = generateEmail(userDomains);
+          sendGridMailService
+            .send(
+              {
+                from: 'delivery@wordly.domains',
+                to: email,
+                subject: `Domains coming soon you may want - ${new Date()
+                  .toISOString()
+                  .replace(/T.*/, '')}`,
+                html: emailText,
+              },
+              false,
+              (error, result) => {
+                if (error) {
+                  logger.error(error.toString());
+                  console.log(error);
+                } else {
+                  logger.error(result.toString());
+                  console.log(result);
+                }
               }
-            }
-          );
+            )
+            .then(() => {
+              logger.debug(`Sent email to ${email}`);
+            })
+            .catch((error) => {
+              logger.error(error.toString());
+            });
         } catch (error) {
           if (error.response) {
             logger.error(error.response.body);

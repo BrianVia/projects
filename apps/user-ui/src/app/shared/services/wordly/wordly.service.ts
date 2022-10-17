@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { Profile } from '../../interaces/profile';
 
 @Injectable({
   providedIn: 'root',
@@ -14,8 +16,14 @@ export class WordlyService {
   constructor(http: HttpClient) {
     this.http = http;
   }
-  fetchUserData(userId: string) {
+  fetchUserData(userId: string): Observable<Profile> {
     console.log('calling local wordly api');
-    return this.http.get(`${this.BASE_URL}/user/${userId}`);
+    return this.http.get<Profile>(`${this.BASE_URL}/user/${userId}`);
+  }
+
+  updateWordPreferences(userId: string, wordPreferences: string[]) {
+    return this.http.put(`${this.BASE_URL}/user/${userId}`, {
+      wordPreferences,
+    });
   }
 }

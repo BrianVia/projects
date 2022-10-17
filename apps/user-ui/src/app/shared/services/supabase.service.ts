@@ -7,12 +7,6 @@ import {
 } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
 
-export interface Profile {
-  email: string | null;
-  active_subscription: boolean;
-  word_preferences: string[];
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -27,21 +21,11 @@ export class SupabaseService {
   }
 
   get user() {
-    console.log(this.supabase.auth.user());
     return this.supabase.auth.user();
   }
 
   get session() {
-    // console.log(this.supabase.auth);
     return this.supabase.auth.session();
-  }
-
-  get profile() {
-    return this.supabase
-      .from('profiles')
-      .select(`email, word_preferences, active_subscription`)
-      .eq('id', this.user?.id)
-      .single();
   }
 
   authChanges(

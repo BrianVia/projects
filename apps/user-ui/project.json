@@ -65,7 +65,7 @@
         },
         "development": {
           "browserTarget": "user-ui:build:development",
-          "proxyConfig": "proxy.conf.json"
+          "proxyConfig": "apps/user-ui/proxy.conf.json"
         }
       },
       "defaultConfiguration": "development"

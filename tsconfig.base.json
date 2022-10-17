@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@wordly-domains/data": ["libs/data/src/index.ts"],
+      "@wordly-domains/email": ["libs/email/src/index.ts"],
       "@wordly-domains/logger": ["libs/logger/src/index.ts"]
     }
   },
