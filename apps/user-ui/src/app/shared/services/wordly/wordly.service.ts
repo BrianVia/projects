@@ -18,6 +18,7 @@ export class WordlyService {
   }
   fetchUserData(userId: string): Observable<Profile> {
     console.log('calling local wordly api');
+    console.log(this.BASE_URL);
     return this.http.get<Profile>(`${this.BASE_URL}/user/${userId}`);
   }
 
