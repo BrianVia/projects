@@ -16,10 +16,8 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    console.log('Session:');
-    console.log(this.supabaseService.session);
     const token = this.supabaseService.session?.access_token;
-    console.log(token);
+
     if (token) {
       const cloned = req.clone({
         headers: req.headers.set('Authorization', 'Bearer ' + token),

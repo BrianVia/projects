@@ -22,7 +22,7 @@ export class WordlyService {
   }
 
   updateWordPreferences(userId: string, wordPreferences: string[]) {
-    return this.http.put(`${this.BASE_URL}/user/${userId}`, {
+    return this.http.put(`${this.BASE_URL}/user/${userId}/wordPreferences`, {
       wordPreferences,
     });
   }

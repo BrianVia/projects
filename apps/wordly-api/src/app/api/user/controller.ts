@@ -25,6 +25,7 @@ class UserController {
     }
 
     const { profile, error } = await fetchUserProfile(userId);
+    logger.debug(`got user profile: ${profile}`);
     if (error) {
       logger.error(error.toString());
       res.status(500).send(error);
@@ -43,7 +44,9 @@ class UserController {
   async handleWordPreferencesUpdate(req, res, next) {
     // update the user's profile with the request word preferences
     const userId = req.params.userId;
-    logger.info(`received request: GET /api/v1/user/${userId}`);
+    logger.info(
+      `received request: POST /api/v1/user/${userId}/wordPreferences`
+    );
     const token = req.headers.authorization;
     const tokenUser = await getTokenUser(token);
     if (tokenUser) {
@@ -59,7 +62,7 @@ class UserController {
     }
 
     const wordPreferences: string[] = req.body.wordPreferences;
-
+    console.log(wordPreferences);
     const update = {
       word_preferences: wordPreferences,
       id: userId,
@@ -68,8 +71,9 @@ class UserController {
     const { data, error } = await supabase.from('profiles').upsert(update);
 
     if (error) {
+      console.error(error);
       logger.error(error.toString());
-      res.status(500).send(error);
+      res.status(500).send(error.toString());
     }
     res.status(200).send(data);
   }
@@ -79,7 +83,7 @@ async function getTokenUser(token: string) {
   if (token.startsWith('Bearer ')) {
     token = removeBearer(token);
   }
-  const { user, data, error } = await supabase.auth.api.getUser(token);
+  const { user, error } = await supabase.auth.api.getUser(token);
   if (error) {
     logger.error(error.toString());
   }

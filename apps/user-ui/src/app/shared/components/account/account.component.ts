@@ -53,6 +53,7 @@ export class AccountComponent implements OnInit {
   }
 
   updateWordPreferences(wordPreferences: string[]) {
+    console.log(wordPreferences);
     // debugger;
     const uid = this.session?.user?.id;
     if (!uid) {
@@ -60,7 +61,17 @@ export class AccountComponent implements OnInit {
     } else {
       try {
         this.loading = true;
-        this.wordlyService.updateWordPreferences(uid, wordPreferences);
+        this.wordlyService
+          .updateWordPreferences(uid, wordPreferences)
+          .subscribe({
+            next: (data) => {
+              console.log('updated');
+              console.log(data);
+            },
+            error: (error) => {
+              console.log(error);
+            },
+          });
       } catch (error: any) {
         alert(error.message);
       } finally {
