@@ -4,7 +4,7 @@ import { sendEmails } from '@wordly-domains/email';
 
 export class cronjobs {
   scheduleJobs() {
-    cron.schedule('30 11 * * 1,3,5', () => {
+    cron.schedule('30 11 * * *', () => {
       sendEmails();
     });
     cron.schedule('0 5 * * *', () => {

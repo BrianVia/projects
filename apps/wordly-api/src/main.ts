@@ -11,20 +11,27 @@ import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
 import { sendEmails } from '@wordly-domains/email';
-const allowedOrigins = [
-  'http://localhost:4200',
-  'http://localhost:4200#',
-  'https://wordly.domains/',
-];
+const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains'];
 const app = express();
 
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+const cors = {
+  origin: allowedOrigins,
+  optionsSuccessStatus: 200,
+  default: 'wordly.domains',
+};
+
+app.all('*', function (req, res, next) {
+  const origin = req.headers.origin;
+  if (cors.origin.indexOf(origin) >= 0) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
   next();
 });
+
 app.use(express.json());
 
 const logger = new Logger();
