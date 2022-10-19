@@ -77,6 +77,37 @@ class UserController {
     }
     res.status(200).send(data);
   }
+
+  async handleSubscriptionUpdate(req, res, next) {
+    const newSubscriptionValue: boolean = req.body.activeSubscription;
+    const userId: string = req.params.userId;
+    logger.info(`received request: POST /api/v1/user/${userId}/subscription`);
+    const token = req.headers.authorization;
+    const tokenUser = await getTokenUser(token);
+    if (tokenUser) {
+      logger.debug(`token user found: ${tokenUser?.id}`);
+    } else {
+      logger.warn(`token user not found`);
+      res.status(401).send('Unauthorized');
+    }
+
+    if (tokenUser?.id !== userId) {
+      logger.warn(`User ${tokenUser?.id} tried to update user ${userId}`);
+      res.status(403).send('Forbidden');
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ active_subscription: newSubscriptionValue })
+      .eq('id', userId);
+
+    if (error) {
+      console.error(error);
+      logger.error(error.toString());
+      res.status(500).send(error.toString());
+    }
+    res.status(200).send(data);
+  }
 }
 
 async function getTokenUser(token: string) {

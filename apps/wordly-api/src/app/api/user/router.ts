@@ -14,3 +14,7 @@ userRouter.put(
   `/:userId/wordPreferences`,
   userController.handleWordPreferencesUpdate
 );
+userRouter.post(
+  '/:userId/subscription',
+  userController.handleSubscriptionUpdate
+);
