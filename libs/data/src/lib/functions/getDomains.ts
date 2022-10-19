@@ -9,6 +9,28 @@ import { sleep } from '../utilities';
 const LOG_LEVEL = process.env.LOG_LEVEL || 'INFO';
 const logger = new Logger();
 
+const parkIOTLDs = [
+  '.io',
+  '.co',
+  '.us',
+  '.to',
+  '.gg',
+  '.ly',
+  '.vc',
+  '.me',
+  '.sh',
+  '.bz',
+  '.ag',
+  '.sc',
+  '.ac',
+  '.lc',
+  '.je',
+  '.mn',
+  '.pro',
+  '.info',
+  '.red',
+];
+
 export async function getDomains() {
   const domains = await getParkIODomains()
     .then((data: ParkIOAPIResponse) => {
