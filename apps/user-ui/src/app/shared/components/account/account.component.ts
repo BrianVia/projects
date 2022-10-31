@@ -18,7 +18,7 @@ export class AccountComponent implements OnInit {
   ) {}
 
   loading = false;
-  profile: Profile | undefined = {
+  profile: Profile = {
     email: '',
     activeSubscription: false,
     wordPreferences: [],
@@ -41,6 +41,8 @@ export class AccountComponent implements OnInit {
         this.wordPreferencesForm.patchValue({
           wordPreferences: this.profile?.wordPreferences?.join(','),
         });
+        console.log('profile');
+        console.log(this.profile);
       });
   }
 

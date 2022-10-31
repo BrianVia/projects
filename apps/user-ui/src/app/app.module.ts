@@ -10,6 +10,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NavigationComponent } from './shared/components/navigation/navigation.component';
 import { httpInterceptorProviders } from './shared/interceptors';
 import { HttpClientModule } from '@angular/common/http';
+import { WordPreferencesComponent } from './shared/components/word-preferences/word-preferences.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
     AccountComponent,
     FooterComponent,
     NavigationComponent,
+    WordPreferencesComponent,
   ],
   imports: [BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [httpInterceptorProviders],
