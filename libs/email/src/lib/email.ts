@@ -19,21 +19,35 @@ export function generateEmail(domains: Domain[]): string {
 }
 
 export function generateDomainTable(domains: Domain[]) {
+  const today = new Date();
+  const sortedDomains = domains.sort((a, b) => {
+    // sort by date available
+    if (a.date_available < b.date_available) {
+      return -1;
+    }
+    if (a.date_available > b.date_available) {
+      return 1;
+    }
+    return 0;
+  });
   let table = `<table style="width:100%">
   <tr>
     <th>Name</th>
     <th>Date Available</th> 
-    <th>Preorder Link (Park.io)</th>
-    <th>Registrar Link</th>
+    <th>Preorder/Purchase</th>
   </tr>`;
-  domains.forEach((domain) => {
+  sortedDomains.forEach((domain) => {
     table += `<tr>
     <td>${domain.name}</td>
     <td>${domain.date_available}</td> 
-    <td><a href="https://park.io/domains/view/${domain.name}">Preorder</a></td>
-    <td><a href="https://www.namecheap.com/domains/registration/results/?domain=${domain.name}">Purchase on Registrar</a></td>
+    ${
+      new Date(domain.date_available).valueOf() >= today.valueOf()
+        ? `<td><a href="https://park.io/domains/view/${domain.name}">Preorder</a></td>`
+        : `<td><a href="https://www.namecheap.com/domains/registration/results/?domain=${domain.name}">Purchase</a></td>`
+    }
   </tr>`;
   });
   table += '</table>';
+  console.log(table);
   return table;
 }

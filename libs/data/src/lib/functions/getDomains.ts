@@ -111,7 +111,7 @@ async function loadDomain(domain: ParkIODomain, supabase: SupabaseClient) {
     {
       name: domain.name,
       tld: domain.tld,
-      date_available: new Date(domain.date_available),
+      date_available: domain.date_available,
       park_io_id: domain.id,
       subwords,
     },

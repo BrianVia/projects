@@ -3,6 +3,6 @@ export type Domain = {
   park_io_id: string;
   name: string;
   tld: string;
-  date_available: Date;
+  date_available: string;
   subwords: string[];
 };
