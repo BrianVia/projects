@@ -1,12 +1,10 @@
 <div class="font-mono">
-  <header class="px-xl py-md bg-primary-light text-xl font-bold shadow-md">
-    Wordly Domains
+  <header class="px-xl py-md bg-primary-light text-xl font-bold">
     <user-ui-navigation></user-ui-navigation>
   </header>
 
-  <main class="flex flex-wrap -mx-4 -mb-4 md:mb-0">
-    <div class="w-full md:w-1/3 px-4 mb-4 md:mb-0"></div>
-    <div class="w-full md:w-2/3 px-4 mb-4 md:mb-0">
+  <main class="flex flex-wrap sm:mx-2 md:mx-8 lg: mx-8">
+    <div class="w-full md:w-2/3 md:mb-0">
       <user-ui-account
         *ngIf="session; else auth"
         [session]="session"
@@ -16,5 +14,5 @@
       </ng-template>
     </div>
   </main>
-  <user-ui-footer></user-ui-footer>
+  <!-- <user-ui-footer></user-ui-footer> -->
 </div>

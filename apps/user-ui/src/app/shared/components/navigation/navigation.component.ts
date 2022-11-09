@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Session } from '@supabase/supabase-js';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'user-ui-navigation',
@@ -6,7 +8,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./navigation.component.sass'],
 })
 export class NavigationComponent implements OnInit {
-  constructor() {}
+  session = this.supabase.session;
 
-  ngOnInit(): void {}
+  constructor(private readonly supabase: SupabaseService) {}
+
+  ngOnInit() {
+    this.supabase.authChanges((_, session) => (this.session = session));
+  }
+  async signOut() {
+    await this.supabase.signOut();
+  }
 }
