@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
-  selector: 'user-ui-auth',
-  templateUrl: './auth.component.html',
+  selector: 'user-ui-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.sass'],
 })
-export class AuthComponent {
+export class LoginComponent {
   loading = false;
 
   constructor(private readonly supabase: SupabaseService) {}

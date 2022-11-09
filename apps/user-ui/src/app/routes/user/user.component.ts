@@ -10,7 +10,10 @@ import { Observable } from 'rxjs';
 export class UserComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) {}
 
-  ngOnInit() {}
+  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
+  ngOnInit() {
+    console.log('loaded user component');
+  }
 }
 
 /*

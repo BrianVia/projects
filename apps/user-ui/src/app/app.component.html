@@ -1,16 +1,16 @@
 <div class="font-mono">
-  <header class="px-xl py-md bg-primary-light text-xl font-bold">
+  <header class="px-xl py-md bg-gray-900 text-xl font-bold">
     <user-ui-navigation></user-ui-navigation>
   </header>
 
   <main class="flex flex-wrap sm:mx-2 md:mx-8 lg: mx-8">
-    <div class="w-full md:w-2/3 md:mb-0">
+    <div class="w-full md:mb-0">
       <user-ui-account
         *ngIf="session; else auth"
         [session]="session"
       ></user-ui-account>
-      <ng-template #auth class="bg-red-500">
-        <user-ui-auth></user-ui-auth>
+      <ng-template #auth>
+        <user-ui-login></user-ui-login>
       </ng-template>
     </div>
   </main>
