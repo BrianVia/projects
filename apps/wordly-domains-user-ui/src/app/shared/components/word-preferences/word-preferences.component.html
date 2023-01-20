@@ -1,0 +1,19 @@
+<h2>Word Preferences</h2>
+<!-- list of input fields with a button to add a new input field once the last has a value  -->
+
+<div [formGroup]="wordPreferencesForm">
+  <div *ngFor="let wordPreference of wordPreferences; let i = index">
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        formControlName="wordPreferences.{{ i }}"
+        id="wordPreference"
+        placeholder="Enter word preference"
+      />
+    </div>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="addWordPreference()">
+    Add Word Preference
+  </button>
+</div>
