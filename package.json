@@ -1,6 +1,6 @@
 {
-  "name": "wordly-domains",
-  "version": "0.0.0",
+  "name": "projects",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "ng": "nx",

@@ -5,8 +5,8 @@
     "data": "libs/data",
     "email": "libs/email",
     "logger": "libs/logger",
-    "user-ui": "apps/user-ui",
-    "user-ui-e2e": "apps/user-ui-e2e",
-    "wordly-api": "apps/wordly-api"
+    "wordly-api": "apps/wordly-api",
+    "wordly-domains-user-ui": "apps/wordly-domains-user-ui",
+    "wordly-domains-user-ui-e2e": "apps/wordly-domains-user-ui-e2e"
   }
 }
