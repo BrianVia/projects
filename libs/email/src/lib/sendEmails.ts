@@ -23,23 +23,28 @@ export async function sendEmails() {
 
   users.forEach(({ email, id }) => {
     const profile = profileDataMap.get(id);
-    const userDomains = getUserDomains(
-      profile.word_preferences,
-      availableDomains
-    );
-    logger.debug(`Found domains for ${email}: ${userDomains.length}`);
-    if (userDomains.length > 0 && profile.active_subscription) {
-      console.log(userDomains);
-      const emailBody = generateEmail(userDomains);
-      logger.debug(`Sending email to ${email}`);
-      sendGridMailService.send({
-        from: 'delivery@wordly.domains',
-        to: email,
-        subject: `Domains coming soon you may want - ${new Date()
-          .toISOString()
-          .replace(/T.*/, '')}`,
-        html: emailBody,
-      });
+    if (
+      profile.word_preferences !== null &&
+      profile.word_preferences !== undefined &&
+      profile.word_preferences.length > 0
+    ) {
+      const userDomains = getUserDomains(
+        profile.word_preferences,
+        availableDomains
+      );
+      logger.debug(`Found domains for ${email}: ${userDomains.length}`);
+      if (userDomains.length > 0 && profile.active_subscription) {
+        const emailBody = generateEmail(userDomains);
+        logger.debug(`Sending email to ${email}`);
+        sendGridMailService.send({
+          from: 'delivery@wordly.domains',
+          to: email,
+          subject: `Domains coming soon you may want - ${new Date()
+            .toISOString()
+            .replace(/T.*/, '')}`,
+          html: emailBody,
+        });
+      }
     }
   });
 
