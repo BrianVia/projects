@@ -7,4 +7,5 @@ Frontend Hosted on Cloudflare Pages
 
 ## CafeSpeed
 
-Bought a domain
+- Bought a domain
+- Importing some libraries
