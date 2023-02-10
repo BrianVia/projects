@@ -2,6 +2,7 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "cafe-speed-api": "apps/cafe-speed-api",
     "data": "libs/data",
     "email": "libs/email",
     "logger": "libs/logger",
