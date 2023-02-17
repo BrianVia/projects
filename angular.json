@@ -3,6 +3,8 @@
   "version": 2,
   "projects": {
     "cafe-speed-api": "apps/cafe-speed-api",
+    "cafe-speed-ui": "apps/cafe-speed-ui",
+    "cafe-speed-ui-e2e": "apps/cafe-speed-ui-e2e",
     "data": "libs/data",
     "email": "libs/email",
     "logger": "libs/logger",
