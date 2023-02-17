@@ -48,6 +48,7 @@
     "@angular/cli": "~14.2.4",
     "@angular/compiler-cli": "~14.2.4",
     "@angular/language-service": "~14.2.4",
+    "@js-temporal/polyfill": "^0.4.3",
     "@nrwl/cli": "^14.8.2",
     "@nrwl/cypress": "^14.8.6",
     "@nrwl/eslint-plugin-nx": "^14.8.6",

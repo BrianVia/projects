@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
+import { Temporal, toTemporalInstant } from '@js-temporal/polyfill';
 import { Logger } from '@wordly-domains/logger';
 import { ParkIOAPIResponse, ParkIODomain, Domain } from '../interfaces';
 import { supabase } from '../services';
@@ -46,9 +47,8 @@ export async function getDomains() {
 
   if (newDomains.length > 0) {
     logger.info(`Uploading ${newDomains.length} domains`);
-    newDomains.forEach(async (domain: ParkIODomain) => {
-      await loadDomain(domain, supabase);
-    });
+    await loadDomains(newDomains, supabase);
+
     return new Promise((resolve) => {
       logger.info('Domains fetched and loaded into DB');
       resolve('Domains fetched and loaded into DB');
@@ -96,34 +96,38 @@ async function getAvailableDomains() {
   return availableDomains;
 }
 
-async function getParkIODomains(page?: number, limit?: number) {
-  const { data } = await axios.get(
-    `https://park.io/domains/index/io.json?limit=${limit ? limit : 4000}page=${
-      page ? page : 1
-    }`
+async function getParkIODomains(
+  page?: number,
+  limit?: number
+): Promise<ParkIOAPIResponse> {
+  const { data } = await axios.get<ParkIOAPIResponse>(
+    `https://park.io/domains/index/all.json?limit=${limit ?? 10000}`
   );
   return data;
 }
 
-async function loadDomain(domain: ParkIODomain, supabase: SupabaseClient) {
-  const subwords = findWords(domain.name, WORDS);
-  const { data, error } = await supabase.from<Domain>('domains').upsert(
-    {
+async function loadDomains(domains: ParkIODomain[], supabase: SupabaseClient) {
+  const toUpsertDomains = domains.map((domain) => {
+    const subwords = findWords(domain.name, WORDS);
+    return {
       name: domain.name,
       tld: domain.tld,
-      date_available: domain.date_available,
+      date_available: Temporal.PlainDate.from(domain.date_available).toString(),
       park_io_id: domain.id,
       subwords,
-    },
-    {
+    };
+  });
+
+  const { data, error } = await supabase
+    .from<Domain>('domains')
+    .upsert(toUpsertDomains, {
       ignoreDuplicates: true,
       returning: 'minimal',
-    }
-  );
+    });
   if (data) {
     if (LOG_LEVEL === 'DEBUG') {
-      logger.debug(`loaded domain ${domain.name}`);
-      logger.debug(`subwords: ${subwords}`);
+      logger.debug('loaded domains');
+      logger.debug(data.toString());
     }
   }
   if (error) {
