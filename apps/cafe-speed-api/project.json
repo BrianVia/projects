@@ -49,7 +49,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/cafe-speed-api"],
+      "outputs": ["{workspaceRoot}/coverage/apps/cafe-speed-api"],
       "options": {
         "jestConfig": "apps/cafe-speed-api/jest.config.ts",
         "passWithNoTests": true

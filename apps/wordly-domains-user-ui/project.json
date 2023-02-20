@@ -85,7 +85,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/wordly-domains-user-ui"],
+      "outputs": ["{workspaceRoot}/coverage/apps/wordly-domains-user-ui"],
       "options": {
         "jestConfig": "apps/wordly-domains-user-ui/jest.config.ts",
         "passWithNoTests": true

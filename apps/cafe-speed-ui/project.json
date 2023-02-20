@@ -22,7 +22,8 @@
         ],
         "styles": ["apps/cafe-speed-ui/src/styles.css"],
         "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack"
+        "webpackConfig": "apps/cafe-speed-ui/webpack.config.js",
+        "isolatedConfig": true
       },
       "configurations": {
         "development": {
@@ -73,7 +74,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/cafe-speed-ui"],
+      "outputs": ["{workspaceRoot}/coverage/apps/cafe-speed-ui"],
       "options": {
         "jestConfig": "apps/cafe-speed-ui/jest.config.ts",
         "passWithNoTests": true
