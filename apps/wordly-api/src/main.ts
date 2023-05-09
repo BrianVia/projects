@@ -11,8 +11,8 @@ import 'dotenv/config';
 import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
-import { sendEmails } from '@wordly-domains/email';
-import { getDomains } from '@wordly-domains/data';
+// import { sendEmails } from '@wordly-domains/email';
+// import { loadDomains } from '@wordly-domains/data';
 
 const allowedOrigins = ['http://localhost:4200', 'https://wordly.domains'];
 const app = express();
