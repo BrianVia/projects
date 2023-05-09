@@ -32,7 +32,7 @@ const parkIOTLDs = [
   '.red',
 ];
 
-export async function getDomains() {
+export async function loadDomains() {
   const domains = [];
   for (const tld of parkIOTLDs) {
     const tldDomains = await getParkIODomains(tld);
@@ -43,7 +43,7 @@ export async function getDomains() {
 
   if (newDomains.length > 0) {
     logger.info(`Uploading ${newDomains.length} domains`);
-    await loadDomains(newDomains, supabase);
+    await upsertDomains(newDomains, supabase);
 
     return new Promise((resolve) => {
       logger.info('Domains fetched and loaded into DB');
@@ -120,7 +120,10 @@ async function getParkIODomains(tld: string) {
   return resultDomains;
 }
 
-async function loadDomains(domains: ParkIODomain[], supabase: SupabaseClient) {
+async function upsertDomains(
+  domains: ParkIODomain[],
+  supabase: SupabaseClient
+) {
   const toUpsertDomains = domains.map((domain) => {
     const subwords = findWords(domain.name, WORDS);
     return {

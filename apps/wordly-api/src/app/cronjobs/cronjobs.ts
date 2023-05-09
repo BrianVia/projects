@@ -1,5 +1,5 @@
 import * as cron from 'node-cron';
-import { cleanDomains, getDomains } from '@wordly-domains/data';
+import { cleanDomains, loadDomains } from '@wordly-domains/data';
 import { sendEmails } from '@wordly-domains/email';
 
 export class cronjobs {
@@ -8,7 +8,7 @@ export class cronjobs {
       sendEmails();
     });
     cron.schedule('0 5 * * *', () => {
-      getDomains();
+      loadDomains();
     });
     cron.schedule('15 5 * * *', () => {
       cleanDomains();

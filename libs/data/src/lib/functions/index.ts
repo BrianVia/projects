@@ -1,2 +1,2 @@
 export { cleanDomains } from './cleanDomains';
-export { getDomains } from './getDomains';
+export { loadDomains } from './loadDomains';
