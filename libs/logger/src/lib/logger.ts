@@ -42,7 +42,7 @@ export class Logger {
       this.logLevel === 'LOG' ||
       this.logLevel === 'DEBUG'
     ) {
-      console.error(`ERROR: ${message}`);
+      console.error(`ERROR: ${message.toString()}`);
     }
   }
   fatal(message: string) {

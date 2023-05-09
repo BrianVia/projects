@@ -25,8 +25,6 @@ const logger = new Logger();
 const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
-getDomains();
-
 app.use('/api/v1/user', userRouter);
 
 const port = process.env.PORT || 8080;

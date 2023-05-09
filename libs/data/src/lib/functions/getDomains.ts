@@ -33,15 +33,11 @@ const parkIOTLDs = [
 ];
 
 export async function getDomains() {
-  const domains = await getParkIODomains()
-    .then((data: ParkIOAPIResponse) => {
-      logger.log(`retrieved ${data.domains.length} domains`);
-      return data.domains;
-    })
-    .catch((err) => {
-      logger.error(err);
-      return Promise.reject('could not fetch domains from Park.IO');
-    });
+  const domains = [];
+  for (const tld of parkIOTLDs) {
+    const tldDomains = await getParkIODomains(tld);
+    domains.push(...tldDomains);
+  }
 
   const newDomains = await filterOutDomainsWeHave(domains);
 
@@ -96,14 +92,32 @@ async function getAvailableDomains() {
   return availableDomains;
 }
 
-async function getParkIODomains(
-  page?: number,
-  limit?: number
-): Promise<ParkIOAPIResponse> {
-  const { data } = await axios.get<ParkIOAPIResponse>(
-    `https://park.io/domains/index/all.json?limit=${limit ?? 10000}`
-  );
-  return data;
+async function getParkIODomains(tld: string) {
+  let resultDomains: ParkIODomain[] = [];
+  let currentPage = 1;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    try {
+      const response = await axios.get<ParkIOAPIResponse>(
+        `https://park.io/domains/index/${tld}/page:${currentPage}.json?limit=1000`
+      );
+      const data = response.data;
+
+      if (data.success) {
+        resultDomains = resultDomains.concat(data.domains);
+        currentPage++;
+        hasNextPage = data.nextPage && currentPage <= data.pageCount;
+      } else {
+        hasNextPage = false;
+      }
+    } catch (error) {
+      console.error(error);
+      hasNextPage = false;
+    }
+  }
+
+  return resultDomains;
 }
 
 async function loadDomains(domains: ParkIODomain[], supabase: SupabaseClient) {
