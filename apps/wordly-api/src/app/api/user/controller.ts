@@ -135,4 +135,4 @@ async function fetchUserProfile(
 function removeBearer(token: string) {
   return token.replace('Bearer ', '');
 }
-export { UserController };
+export { UserController, getTokenUser };

@@ -11,6 +11,7 @@ import 'dotenv/config';
 import { cronjobs } from './app/cronjobs/cronjobs';
 import { Logger } from '@wordly-domains/logger';
 import { userRouter } from './app/api/user';
+import { domainRouter } from './app/api/domains';
 // import { sendEmails } from '@wordly-domains/email';
 // import { loadDomains } from '@wordly-domains/data';
 
@@ -26,6 +27,7 @@ const cronHandler = new cronjobs();
 cronHandler.scheduleJobs();
 
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/domains', domainRouter);
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
