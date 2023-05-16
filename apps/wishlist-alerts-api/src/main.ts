@@ -4,18 +4,27 @@
  */
 
 import express from 'express';
-import * as path from 'path';
+import cors from 'cors';
 
+import 'dotenv/config';
+
+import { Logger } from '@wordly-domains/logger';
+import { wishlistRouter } from './api/wishlist/router';
+// import { sendEmails } from '@wordly-domains/email';
+// import { loadDomains } from '@wordly-domains/data';
+
+const allowedOrigins = ['http://localhost:4200', 'https://wishlistalerts.io'];
 const app = express();
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use(cors({ origin: allowedOrigins }));
+app.use(express.json());
 
-app.get('/api', (req, res) => {
-  res.send({ message: 'Welcome to wishlist-alerts-api!' });
-});
+const logger = new Logger();
 
-const port = process.env.PORT || 3333;
+app.use('/api/v1/wishlist', wishlistRouter);
+
+const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+  logger.info(`Listening at http://localhost:${port}/api`);
 });
-server.on('error', console.error);
+server.on('error', logger.error);

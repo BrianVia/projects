@@ -17,25 +17,25 @@ class DomainsController {
       logger.warn(`token user not found`);
       res.status(401).send('Unauthorized');
     }
-    const data = await fetchDomains();
+    const data = await this.fetchDomains();
 
     res.status(200).json(data);
   }
-}
 
-async function fetchDomains(tlds: string[] = []) {
-  const { data: domains, error } = await supabase
-    .from<Domain>('domains')
-    .select('name, tld, date_available, subwords')
-    // .in('tld', tlds)
-    .order('tld', { ascending: true });
+  async fetchDomains(tlds: string[] = []) {
+    const { data: domains, error } = await supabase
+      .from<Domain>('domains')
+      .select('name, tld, date_available, subwords')
+      // .in('tld', tlds)
+      .order('tld', { ascending: true });
 
-  if (error) {
-    logger.error(error.toString());
-    throw error;
+    if (error) {
+      logger.error(error.toString());
+      throw error;
+    }
+
+    return domains;
   }
-
-  return domains;
 }
 
 export { DomainsController };
