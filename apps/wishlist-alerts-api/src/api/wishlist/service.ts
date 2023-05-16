@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import cheerio from 'cheerio';
+import { randomUUID } from 'crypto';
 
 interface WishlistResult {
   itemId: string;
@@ -14,17 +15,18 @@ class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
     statusCode: number;
     response: {
-      data: WishlistResult[];
-      size: number;
+      wishlistId: string;
+      wishlistUrl: string;
+      wishlishItems: {
+        size: number;
+        items: WishlistResult[];
+      };
     };
   }> {
-    const wishlist_url =
-      'https://www.amazon.com/hz/wishlist/ls/27RORQ2D4ZEPH?ref_=wl_share';
-
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto(wishlist_url);
+    await page.goto(wishlistUrl);
 
     let previousHeight = 0;
     // eslint-disable-next-line no-constant-condition
@@ -83,17 +85,18 @@ class WishlistService {
       });
     });
 
-    console.log(`Found ${results.length} items`);
+    console.log(`Retrieved ${results.length} items for ${wishlistUrl}`);
     const response = {
       statusCode: 200,
       response: {
-        size: results.length,
-        data: results,
+        wishlistId: randomUUID().toString(),
+        wishlistUrl: wishlistUrl,
+        wishlishItems: {
+          size: results.length,
+          items: results,
+        },
       },
     };
-
-    console.table(results);
-    console.log(`Found ${results.length} items`);
 
     await browser.close();
 

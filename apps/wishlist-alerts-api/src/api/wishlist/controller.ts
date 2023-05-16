@@ -16,6 +16,7 @@ class WishlistController {
     //     logger.warn(`token user not found`);
     //     res.status(401).send('Unauthorized');
     // }
+
     const wishlistUrl = req.body.wishlistUrl;
     const data = await wishlistService.parseWishlist(wishlistUrl);
 
