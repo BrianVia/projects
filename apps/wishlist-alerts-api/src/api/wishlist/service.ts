@@ -13,14 +13,11 @@ interface WishlistResult {
 
 class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
-    statusCode: number;
-    response: {
-      wishlistId: string;
-      wishlistUrl: string;
-      wishlishItems: {
-        size: number;
-        items: WishlistResult[];
-      };
+    wishlistId: string;
+    wishlistUrl: string;
+    wishlishItems: {
+      size: number;
+      items: WishlistResult[];
     };
   }> {
     const browser = await puppeteer.launch({ headless: true });
@@ -86,21 +83,18 @@ class WishlistService {
     });
 
     console.log(`Retrieved ${results.length} items for ${wishlistUrl}`);
-    const response = {
-      statusCode: 200,
-      response: {
-        wishlistId: randomUUID().toString(),
-        wishlistUrl: wishlistUrl,
-        wishlishItems: {
-          size: results.length,
-          items: results,
-        },
+    const responseData = {
+      wishlistId: randomUUID().toString(),
+      wishlistUrl: wishlistUrl,
+      wishlishItems: {
+        size: results.length,
+        items: results,
       },
     };
 
     await browser.close();
 
-    return Promise.resolve(response);
+    return Promise.resolve(responseData);
   }
 }
 
