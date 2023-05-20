@@ -13,7 +13,6 @@ interface WishlistResult {
 
 class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
-    wishlistId: string;
     wishlistUrl: string;
     wishlishItems: {
       size: number;
@@ -84,7 +83,6 @@ class WishlistService {
 
     console.log(`Retrieved ${results.length} items for ${wishlistUrl}`);
     const responseData = {
-      wishlistId: randomUUID().toString(),
       wishlistUrl: wishlistUrl,
       wishlishItems: {
         size: results.length,

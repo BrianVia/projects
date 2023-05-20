@@ -9,4 +9,4 @@ const wishlistController = new WishlistController();
 
 export const wishlistRouter = Router().use(cors());
 
-wishlistRouter.post(`/new`, wishlistController.handleWishlistPost);
+wishlistRouter.post(`/new`, wishlistController.handlePostNewWishlist);
