@@ -38,8 +38,8 @@ class WishlistController {
       //insert any new items if needed
 
       res.status(200).json({
-        wishlistItems: wishlistData.wishlishItems,
         ...fetchData['0'],
+        wishlistItems: wishlistData.wishlishItems,
       });
       return;
     }
@@ -58,8 +58,8 @@ class WishlistController {
     console.log(insertData);
     console.error(insertError);
     res.status(200).json({
-      wishlistItems: wishlistData.wishlishItems,
       ...insertData['0'],
+      wishlist_items: wishlistData.wishlishItems,
     });
   }
 
