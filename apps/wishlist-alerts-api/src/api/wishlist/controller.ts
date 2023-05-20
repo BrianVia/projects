@@ -29,9 +29,24 @@ class WishlistController {
     logger.debug(`wishlistUrl: ${wishlistUrl}`);
     const wishlistData = await wishlistService.parseWishlist(wishlistUrl);
 
-    const { data, error } = await supabaseClient
+    const { data: fetchData, error: fetchError } = await supabaseClient
       .from('wishlists')
-      .upsert({
+      .select('*', { count: 'exact' })
+      .eq('wishlist_url', wishlistUrl);
+
+    if (fetchData.length > 0) {
+      //insert any new items if needed
+
+      res.status(200).json({
+        wishlistItems: wishlistData.wishlishItems,
+        ...fetchData['0'],
+      });
+      return;
+    }
+
+    const { data: insertData, error: insertError } = await supabaseClient
+      .from('wishlists')
+      .insert({
         wishlist_url: wishlistUrl,
         wishlist_user_id: '553c9eca-29ee-4141-ae31-74ad4d2a2c10',
         monitored: true,
@@ -40,15 +55,11 @@ class WishlistController {
       })
       .select();
 
-    if (error) {
-      logger.error(error.toString());
-    }
-
-    console.log(data);
-    console.error(error);
+    console.log(insertData);
+    console.error(insertError);
     res.status(200).json({
       wishlistItems: wishlistData.wishlishItems,
-      ...data['0'],
+      ...insertData['0'],
     });
   }
 
