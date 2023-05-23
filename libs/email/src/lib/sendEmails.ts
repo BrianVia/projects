@@ -4,7 +4,7 @@ import { Profile } from '@wordly-domains/data';
 import { supabase } from '@wordly-domains/data';
 
 import { sleep } from '@wordly-domains/data';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { generateEmail } from './email';
 import 'dotenv/config';
 

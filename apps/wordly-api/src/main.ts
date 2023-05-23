@@ -9,7 +9,7 @@ import * as cors from 'cors';
 import 'dotenv/config';
 
 import { cronjobs } from './app/cronjobs/cronjobs';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { userRouter } from './app/api/user';
 import { domainRouter } from './app/api/domains';
 // import { sendEmails } from '@wordly-domains/email';

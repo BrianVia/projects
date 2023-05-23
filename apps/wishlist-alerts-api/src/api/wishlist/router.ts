@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import cors from 'cors';
 import { WishlistController } from './controller';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 
 const logger = new Logger();
 

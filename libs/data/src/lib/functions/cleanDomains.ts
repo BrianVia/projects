@@ -1,4 +1,4 @@
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { Domain } from '../interfaces';
 import { supabase } from '../services';
 import 'dotenv/config';

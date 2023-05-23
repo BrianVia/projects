@@ -1,7 +1,7 @@
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@wordly-domains/data';
 import { Profile } from '@wordly-domains/data';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 
 const logger = new Logger();
 

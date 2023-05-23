@@ -8,7 +8,7 @@ import cors from 'cors';
 
 import 'dotenv/config';
 
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { wishlistRouter } from './api/wishlist/router';
 // import { sendEmails } from '@wordly-domains/email';
 // import { loadDomains } from '@wordly-domains/data';

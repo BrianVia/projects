@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { Temporal, toTemporalInstant } from '@js-temporal/polyfill';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { ParkIOAPIResponse, ParkIODomain, Domain } from '../interfaces';
 import { supabase } from '../services';
 import { WORDS } from '../data';

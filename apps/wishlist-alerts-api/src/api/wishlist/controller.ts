@@ -1,10 +1,10 @@
 import { PostgrestError } from '@supabase/supabase-js';
-import { Logger } from '@wordly-domains/logger';
+import { Logger } from '@common/logger';
 import { WishlistService } from './service';
 import { createClient } from '@supabase/supabase-js';
 
 import { Database } from '../../types/supabase';
-import { randomUUID } from 'crypto';
+import { AuthService } from '../../lib/auth';
 
 const logger = new Logger();
 const wishlistService = new WishlistService();
@@ -12,18 +12,19 @@ const supabaseClient = createClient<Database>(
   process.env.WISHLIST_ALERTS_SUPABASE_URL,
   process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
 );
+const authService = new AuthService();
 
 class WishlistController {
   async handlePostNewWishlist(req, res, next) {
     logger.info(`received request: POST /api/v1/wishlist/new`);
-    // const token = req.headers.authorization;
-    // const tokenUser = await getTokenUser(token);
-    // if (tokenUser) {
-    //     logger.debug(`token user found: ${tokenUser?.id}`);
-    // } else {
-    //     logger.warn(`token user not found`);
-    //     res.status(401).send('Unauthorized');
-    // }
+    const token = req.headers.authorization;
+    const tokenUser = await authService.getTokenUser(token);
+    if (tokenUser) {
+      logger.debug(`token user found: ${tokenUser?.id}`);
+    } else {
+      logger.warn(`token user not found`);
+      res.status(401).send('Unauthorized');
+    }
 
     const wishlistUrl = req.body.wishlistUrl;
     logger.debug(`wishlistUrl: ${wishlistUrl}`);
@@ -48,7 +49,7 @@ class WishlistController {
       .from('wishlists')
       .insert({
         wishlist_url: wishlistUrl,
-        wishlist_user_id: '553c9eca-29ee-4141-ae31-74ad4d2a2c10',
+        wishlist_user_id: tokenUser.id,
         monitored: true,
         initialized: true,
         update_frequency: 'daily',
