@@ -112,13 +112,13 @@ class UserController {
 
 async function getTokenUser(token: string) {
   if (token.startsWith('Bearer ')) {
-    token = removeBearer(token);
+    token = this.removeBearer(token);
   }
-  const { user, error } = await supabase.auth.api.getUser(token);
+  const { data, error } = await supabase.auth.getUser(token);
   if (error) {
     logger.error(error.toString());
   }
-  return user;
+  return data.user;
 }
 
 async function fetchUserProfile(

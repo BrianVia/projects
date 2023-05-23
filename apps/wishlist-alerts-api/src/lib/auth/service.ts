@@ -8,11 +8,11 @@ class AuthService {
     if (token.startsWith('Bearer ')) {
       token = this.removeBearer(token);
     }
-    const { user, error } = await supabase.auth.api.getUser(token);
+    const { data, error } = await supabase.auth.getUser(token);
     if (error) {
       logger.error(error.toString());
     }
-    return user;
+    return data.user;
   }
 
   private removeBearer(token: string) {
