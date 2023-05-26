@@ -4,25 +4,13 @@ import cheerio from 'cheerio';
 import { PostgrestError, createClient } from '@supabase/supabase-js';
 import { Database } from '../../types/supabase';
 
-export interface WishlistItemResult {
+export interface ParsedWishlistItem {
   itemId: string;
   itemTitle: string;
   itemMaker: string;
   itemHref: string;
   itemCurrentPrice?: string;
   itemImageUrl?: string;
-}
-
-export interface fetchedWishlist {
-  created_at: string;
-  id: string;
-  initialized: boolean;
-  last_updated_at: string;
-  monitored: boolean;
-  name: string;
-  update_frequency: string;
-  wishlist_url: string;
-  wishlist_user_id: string;
 }
 
 const supabaseClient = createClient<Database>(
@@ -36,7 +24,7 @@ class WishlistService {
     wishlistTitle: string;
     wishlishItems: {
       size: number;
-      items: WishlistItemResult[];
+      items: ParsedWishlistItem[];
     };
   }> {
     const browser = await puppeteer.launch({ headless: true });
@@ -75,7 +63,7 @@ class WishlistService {
     const items = listContainer.find('li.g-item-sortable');
     console.log(`Found ${items.length} items`);
 
-    const results: WishlistItemResult[] = [];
+    const results: ParsedWishlistItem[] = [];
 
     items.each((index, item) => {
       const itemId: string = $(item).data('itemid') as string;
@@ -121,9 +109,10 @@ class WishlistService {
     return Promise.resolve(responseData);
   }
 
-  public async fetchWishlist(
-    wishlistUrl: string
-  ): Promise<{ data: fetchedWishlist; error: PostgrestError }> {
+  public async fetchWishlist(wishlistUrl: string): Promise<{
+    data: Database['public']['Tables']['wishlists']['Row'];
+    error: PostgrestError;
+  }> {
     const { data, error } = await supabaseClient
       .from('wishlists')
       .select('*', { count: 'exact' })
@@ -141,7 +130,10 @@ class WishlistService {
     monitored = true,
     initialized = true,
     updateFrequency = 'daily'
-  ): Promise<{ data: fetchedWishlist; error: PostgrestError }> {
+  ): Promise<{
+    data: Database['public']['Tables']['wishlists']['Insert'];
+    error: PostgrestError;
+  }> {
     const { data, error } = await supabaseClient
       .from('wishlists')
       .insert({

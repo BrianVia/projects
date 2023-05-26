@@ -1,6 +1,6 @@
 import { PostgrestError } from '@supabase/supabase-js';
 import { Logger } from '@common/logger';
-import { WishlistItemResult, WishlistService } from './service';
+import { ParsedWishlistItem, WishlistService } from './service';
 import { createClient } from '@supabase/supabase-js';
 
 import { Database } from '../../types/supabase';
@@ -52,7 +52,7 @@ class WishlistController {
           wishlistData.wishlistTitle
         );
 
-      const insertWishlistItems = this.generateWishlistItems(
+      const insertWishlistItems = this.generateWishlistItemEntities(
         wishlistData,
         insertWishlistData
       );
@@ -73,20 +73,20 @@ class WishlistController {
     }
   }
 
-  private generateWishlistItems(
+  private generateWishlistItemEntities(
     wishlistData: {
       wishlistUrl: string;
       wishlistTitle: string;
       wishlishItems: {
         size: number;
-        items: WishlistItemResult[];
+        items: ParsedWishlistItem[];
       };
     },
-    insertWishlistData: any
-  ) {
+    insertWishlistData: Database['public']['Tables']['wishlists']['Insert']
+  ): Database['public']['Tables']['wishlist_items']['Insert'][] {
     return wishlistData.wishlishItems.items.map((item) => {
       return {
-        wishlistId: insertWishlistData['0'].id,
+        wishlistId: insertWishlistData.id,
         marketplace_item_current_price: parseFloat(item.itemCurrentPrice),
         marketplace_item_href: item.itemHref,
         marketplace_item_id: item.itemId,
