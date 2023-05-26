@@ -1,8 +1,10 @@
 import puppeteer from 'puppeteer';
 import cheerio from 'cheerio';
-import { randomUUID } from 'crypto';
 
-interface WishlistResult {
+import { PostgrestError, createClient } from '@supabase/supabase-js';
+import { Database } from '../../types/supabase';
+
+export interface WishlistItemResult {
   itemId: string;
   itemTitle: string;
   itemMaker: string;
@@ -11,12 +13,30 @@ interface WishlistResult {
   itemImageUrl?: string;
 }
 
+export interface fetchedWishlist {
+  created_at: string;
+  id: string;
+  initialized: boolean;
+  last_updated_at: string;
+  monitored: boolean;
+  name: string;
+  update_frequency: string;
+  wishlist_url: string;
+  wishlist_user_id: string;
+}
+
+const supabaseClient = createClient<Database>(
+  process.env.WISHLIST_ALERTS_SUPABASE_URL,
+  process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
+);
+
 class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
     wishlistUrl: string;
+    wishlistTitle: string;
     wishlishItems: {
       size: number;
-      items: WishlistResult[];
+      items: WishlistItemResult[];
     };
   }> {
     const browser = await puppeteer.launch({ headless: true });
@@ -48,12 +68,14 @@ class WishlistService {
     // Parse the HTML using Cheerio
     const $ = cheerio.load(html);
 
+    const wishlistTitle = $('#profile-list-name').text();
+
     const listContainer = $('ul#g-items');
 
     const items = listContainer.find('li.g-item-sortable');
     console.log(`Found ${items.length} items`);
 
-    const results: WishlistResult[] = [];
+    const results: WishlistItemResult[] = [];
 
     items.each((index, item) => {
       const itemId: string = $(item).data('itemid') as string;
@@ -70,7 +92,10 @@ class WishlistService {
         .find('a.a-link-normal')
         .attr('href')}` as string;
 
-      const itemCurrentPrice = $(item).find('span.a-offscreen').text();
+      const itemCurrentPrice = $(item)
+        .find('span.a-offscreen')
+        .text()
+        .replace('$', '') as string;
 
       results.push({
         itemId,
@@ -84,6 +109,7 @@ class WishlistService {
     console.log(`Retrieved ${results.length} items for ${wishlistUrl}`);
     const responseData = {
       wishlistUrl: wishlistUrl,
+      wishlistTitle: wishlistTitle,
       wishlishItems: {
         size: results.length,
         items: results,
@@ -93,6 +119,44 @@ class WishlistService {
     await browser.close();
 
     return Promise.resolve(responseData);
+  }
+
+  public async fetchWishlist(
+    wishlistUrl: string
+  ): Promise<{ data: fetchedWishlist; error: PostgrestError }> {
+    const { data, error } = await supabaseClient
+      .from('wishlists')
+      .select('*', { count: 'exact' })
+      .eq('wishlist_url', wishlistUrl)
+      .limit(1)
+      .single();
+
+    return Promise.resolve({ data, error });
+  }
+
+  public async insertNewWishlist(
+    wishlistUrl: string,
+    wishlistUserId: string,
+    wishlistName: string,
+    monitored = true,
+    initialized = true,
+    updateFrequency = 'daily'
+  ): Promise<{ data: fetchedWishlist; error: PostgrestError }> {
+    const { data, error } = await supabaseClient
+      .from('wishlists')
+      .insert({
+        wishlist_url: wishlistUrl,
+        wishlist_user_id: wishlistUserId,
+        monitored: monitored,
+        initialized: initialized,
+        update_frequency: updateFrequency,
+        name: wishlistName,
+      })
+      .select()
+      .limit(1)
+      .single();
+
+    return Promise.resolve({ data, error });
   }
 }
 

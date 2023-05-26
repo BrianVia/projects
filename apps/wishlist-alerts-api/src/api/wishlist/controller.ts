@@ -1,6 +1,6 @@
 import { PostgrestError } from '@supabase/supabase-js';
 import { Logger } from '@common/logger';
-import { WishlistService } from './service';
+import { WishlistItemResult, WishlistService } from './service';
 import { createClient } from '@supabase/supabase-js';
 
 import { Database } from '../../types/supabase';
@@ -17,55 +17,91 @@ const authService = new AuthService();
 class WishlistController {
   async handlePostNewWishlist(req, res, next) {
     logger.info(`received request: POST /api/v1/wishlist/new`);
-    const token = req.headers.authorization;
-    const tokenUser = await authService.getTokenUser(token);
-    if (tokenUser) {
-      logger.debug(`token user found: ${tokenUser?.id}`);
-    } else {
-      logger.warn(`token user not found`);
-      res.status(401).send('Unauthorized');
-    }
+    // const token = req.headers.authorization;
+    // const tokenUser = await authService.getTokenUser(token);
+    // if (tokenUser) {
+    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    // } else {
+    //   logger.warn(`token user not found`);
+    //   res.status(401).send('Unauthorized');
+    // }
 
-    const wishlistUrl = req.body.wishlistUrl;
+    const wishlistUrl: string = req.body.wishlistUrl as string;
+    const addAllItems: boolean = req.body.addAllItems as boolean;
     logger.debug(`wishlistUrl: ${wishlistUrl}`);
     const wishlistData = await wishlistService.parseWishlist(wishlistUrl);
 
-    const { data: fetchData, error: fetchError } = await supabaseClient
-      .from('wishlists')
-      .select('*', { count: 'exact' })
-      .eq('wishlist_url', wishlistUrl);
+    const { data: existingWishlistData, error: fetchWishlistError } =
+      await wishlistService.fetchWishlist(wishlistUrl);
 
-    if (fetchData.length > 0) {
+    if (existingWishlistData.id !== undefined) {
+      logger.info(`wishlist already exists in database`);
       //insert any new items if needed
+      // update any wishlist properties?
 
-      res.status(200).json({
-        ...fetchData['0'],
-        wishlistItems: wishlistData.wishlishItems,
+      return res.status(200).json({
+        ...existingWishlistData,
+        already_exists: true,
       });
-      return;
+    } else {
+      logger.info(`wishlist does not exist in database`);
+      const { data: insertWishlistData, error: insertError } =
+        await wishlistService.insertNewWishlist(
+          wishlistData.wishlistUrl,
+          process.env.WISHLIST_ALERTS_MY_USER_UUID,
+          wishlistData.wishlistTitle
+        );
+
+      const insertWishlistItems = this.generateWishlistItems(
+        wishlistData,
+        insertWishlistData
+      );
+
+      const { data: insertItemsData, error: insertItemsError } =
+        await supabaseClient
+          .from('wishlist_items')
+          .upsert(insertWishlistItems)
+          .select();
+
+      logger.log(insertItemsData);
+      logger.error(insertItemsError);
+
+      res.status(201).json({
+        ...insertWishlistData,
+        wishlist_items: wishlistData.wishlishItems,
+      });
     }
+  }
 
-    const { data: insertData, error: insertError } = await supabaseClient
-      .from('wishlists')
-      .insert({
-        wishlist_url: wishlistUrl,
-        wishlist_user_id: tokenUser.id,
+  private generateWishlistItems(
+    wishlistData: {
+      wishlistUrl: string;
+      wishlistTitle: string;
+      wishlishItems: {
+        size: number;
+        items: WishlistItemResult[];
+      };
+    },
+    insertWishlistData: any
+  ) {
+    return wishlistData.wishlishItems.items.map((item) => {
+      return {
+        wishlistId: insertWishlistData['0'].id,
+        marketplace_item_current_price: parseFloat(item.itemCurrentPrice),
+        marketplace_item_href: item.itemHref,
+        marketplace_item_id: item.itemId,
+        marketplace_item_image_url: item.itemImageUrl ?? '',
+        marketplace_item_maker: item.itemMaker,
+        marketplace_item_original_price: parseFloat(item.itemCurrentPrice),
+        marketplace_item_title: item.itemTitle,
         monitored: true,
-        initialized: true,
         update_frequency: 'daily',
-      })
-      .select();
-
-    console.log(insertData);
-    console.error(insertError);
-    res.status(200).json({
-      ...insertData['0'],
-      wishlist_items: wishlistData.wishlishItems,
+      };
     });
   }
 
-  async persistWishlist() {
-    // Create a single supabase client for interacting with your database
+  async handlePostWishlistItems(req, res, next) {
+    console.log(req);
   }
 }
 

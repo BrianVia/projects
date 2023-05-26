@@ -5,36 +5,36 @@ export class Logger {
   constructor() {
     this.logLevel = (process.env.LOG_LEVEL as LOG_LEVEL) || 'INFO';
   }
-  debug(message: string) {
+  debug(message: unknown) {
     if (this.logLevel === 'DEBUG') {
-      console.debug(`DEBUG: ${message}`);
+      console.debug(`DEBUG: ${message.toString()}`);
     }
   }
-  log(message: string) {
+  log(message: unknown) {
     if (this.logLevel === 'LOG' || this.logLevel === 'DEBUG') {
-      console.log(`LOG: ${message}`);
+      console.log(`LOG: ${message.toString()}`);
     }
   }
-  info(message: string) {
+  info(message: unknown) {
     if (
       this.logLevel === 'INFO' ||
       this.logLevel === 'LOG' ||
       this.logLevel === 'DEBUG'
     ) {
-      console.info(`INFO: ${message}`);
+      console.info(`INFO: ${message.toString()}`);
     }
   }
-  warn(message: string) {
+  warn(message: unknown) {
     if (
       this.logLevel === 'WARN' ||
       this.logLevel === 'INFO' ||
       this.logLevel === 'LOG' ||
       this.logLevel === 'DEBUG'
     ) {
-      console.warn(`WARNING: #${message}`);
+      console.warn(`WARNING: #${message.toString()}`);
     }
   }
-  error(message: string) {
+  error(message: unknown) {
     if (
       this.logLevel === 'ERROR' ||
       this.logLevel === 'WARN' ||
@@ -45,7 +45,7 @@ export class Logger {
       console.error(`ERROR: ${message.toString()}`);
     }
   }
-  fatal(message: string) {
+  fatal(message: unknown) {
     if (
       this.logLevel === 'FATAL' ||
       this.logLevel === 'ERROR' ||
@@ -54,7 +54,7 @@ export class Logger {
       this.logLevel === 'LOG' ||
       this.logLevel === 'DEBUG'
     ) {
-      console.error(`FATAL: ${message}`);
+      console.error(`FATAL: ${message.toString()}`);
     }
   }
 }

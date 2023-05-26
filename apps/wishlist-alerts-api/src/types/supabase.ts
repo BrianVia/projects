@@ -37,12 +37,12 @@ export interface Database {
           created_at: string | null
           id: string
           last_updated_at: string | null
-          marketplace_item_current_price: number
+          marketplace_item_current_price: number | null
           marketplace_item_href: string
           marketplace_item_id: string
           marketplace_item_image_url: string | null
           marketplace_item_maker: string
-          marketplace_item_original_price: number
+          marketplace_item_original_price: number | null
           marketplace_item_title: string
           monitored: boolean
           referral_link: string | null
@@ -51,14 +51,14 @@ export interface Database {
         }
         Insert: {
           created_at?: string | null
-          id: string
+          id?: string
           last_updated_at?: string | null
-          marketplace_item_current_price: number
+          marketplace_item_current_price?: number | null
           marketplace_item_href: string
           marketplace_item_id: string
           marketplace_item_image_url?: string | null
           marketplace_item_maker: string
-          marketplace_item_original_price: number
+          marketplace_item_original_price?: number | null
           marketplace_item_title: string
           monitored?: boolean
           referral_link?: string | null
@@ -69,12 +69,12 @@ export interface Database {
           created_at?: string | null
           id?: string
           last_updated_at?: string | null
-          marketplace_item_current_price?: number
+          marketplace_item_current_price?: number | null
           marketplace_item_href?: string
           marketplace_item_id?: string
           marketplace_item_image_url?: string | null
           marketplace_item_maker?: string
-          marketplace_item_original_price?: number
+          marketplace_item_original_price?: number | null
           marketplace_item_title?: string
           monitored?: boolean
           referral_link?: string | null
@@ -89,6 +89,7 @@ export interface Database {
           initialized: boolean
           last_updated_at: string | null
           monitored: boolean
+          name: string | null
           update_frequency: string | null
           wishlist_url: string | null
           wishlist_user_id: string | null
@@ -99,6 +100,7 @@ export interface Database {
           initialized?: boolean
           last_updated_at?: string | null
           monitored?: boolean
+          name?: string | null
           update_frequency?: string | null
           wishlist_url?: string | null
           wishlist_user_id?: string | null
@@ -109,6 +111,7 @@ export interface Database {
           initialized?: boolean
           last_updated_at?: string | null
           monitored?: boolean
+          name?: string | null
           update_frequency?: string | null
           wishlist_url?: string | null
           wishlist_user_id?: string | null
