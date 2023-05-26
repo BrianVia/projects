@@ -52,52 +52,27 @@ class WishlistController {
           wishlistData.wishlistTitle
         );
 
-      const insertWishlistItems = this.generateWishlistItemEntities(
+      const insertWishlistItems = wishlistService.generateWishlistItemEntities(
         wishlistData,
-        insertWishlistData
+        insertWishlistData.id
       );
 
-      const { data: insertItemsData, error: insertItemsError } =
-        await supabaseClient
-          .from('wishlist_items')
-          .upsert(insertWishlistItems)
-          .select();
+      if (addAllItems) {
+        const { data: insertItemsData, error: insertItemsError } =
+          await wishlistService.upsertWishlistItems(
+            insertWishlistItems,
+            insertWishlistData.id
+          );
 
-      logger.log(insertItemsData);
-      logger.error(insertItemsError);
+        logger.log(insertItemsData);
+        logger.error(insertItemsError);
+      }
 
       res.status(201).json({
         ...insertWishlistData,
         wishlist_items: wishlistData.wishlishItems,
       });
     }
-  }
-
-  private generateWishlistItemEntities(
-    wishlistData: {
-      wishlistUrl: string;
-      wishlistTitle: string;
-      wishlishItems: {
-        size: number;
-        items: ParsedWishlistItem[];
-      };
-    },
-    insertWishlistData: Database['public']['Tables']['wishlists']['Insert']
-  ): Database['public']['Tables']['wishlist_items']['Insert'][] {
-    return wishlistData.wishlishItems.items.map((item) => {
-      return {
-        wishlistId: insertWishlistData.id,
-        marketplace_item_current_price: parseFloat(item.itemCurrentPrice),
-        marketplace_item_href: item.itemHref,
-        marketplace_item_id: item.itemId,
-        marketplace_item_image_url: item.itemImageUrl ?? '',
-        marketplace_item_maker: item.itemMaker,
-        marketplace_item_original_price: parseFloat(item.itemCurrentPrice),
-        marketplace_item_title: item.itemTitle,
-        monitored: true,
-        update_frequency: 'daily',
-      };
-    });
   }
 
   async handlePostWishlistItems(req, res, next) {

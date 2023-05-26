@@ -150,6 +150,48 @@ class WishlistService {
 
     return Promise.resolve({ data, error });
   }
+
+  public async upsertWishlistItems(
+    wishlistItems: Database['public']['Tables']['wishlist_items']['Insert'][],
+    wishlistId: string
+  ): Promise<{
+    data: Database['public']['Tables']['wishlist_items']['Insert'][];
+    error: PostgrestError;
+  }> {
+    const { data, error } = await supabaseClient
+      .from('wishlist_items')
+      .insert(wishlistItems)
+      .select();
+
+    return Promise.resolve({ data, error });
+  }
+
+  public generateWishlistItemEntities(
+    wishlistData: {
+      wishlistUrl: string;
+      wishlistTitle: string;
+      wishlishItems: {
+        size: number;
+        items: ParsedWishlistItem[];
+      };
+    },
+    wishlistId: string
+  ): Database['public']['Tables']['wishlist_items']['Insert'][] {
+    return wishlistData.wishlishItems.items.map((item) => {
+      return {
+        wishlistId: wishlistId,
+        marketplace_item_current_price: parseFloat(item.itemCurrentPrice),
+        marketplace_item_href: item.itemHref,
+        marketplace_item_id: item.itemId,
+        marketplace_item_image_url: item.itemImageUrl ?? '',
+        marketplace_item_maker: item.itemMaker,
+        marketplace_item_original_price: parseFloat(item.itemCurrentPrice),
+        marketplace_item_title: item.itemTitle,
+        monitored: true,
+        update_frequency: 'daily',
+      };
+    });
+  }
 }
 
 export { WishlistService };
