@@ -8,10 +8,6 @@ import { AuthService } from '../../lib/auth';
 
 const logger = new Logger();
 const wishlistService = new WishlistService();
-const supabaseClient = createClient<Database>(
-  process.env.WISHLIST_ALERTS_SUPABASE_URL,
-  process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
-);
 const authService = new AuthService();
 
 class WishlistController {
