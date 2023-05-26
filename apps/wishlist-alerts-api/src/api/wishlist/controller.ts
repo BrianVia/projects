@@ -1,7 +1,5 @@
-import { PostgrestError } from '@supabase/supabase-js';
 import { Logger } from '@common/logger';
-import { ParsedWishlistItem, WishlistService } from './service';
-import { createClient } from '@supabase/supabase-js';
+import { WishlistService } from './service';
 
 import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
