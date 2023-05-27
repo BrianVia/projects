@@ -192,6 +192,25 @@ class WishlistService {
       };
     });
   }
+
+  public async withlistBelongsToUser(
+    wishlistId: string,
+    userId: string
+  ): Promise<boolean> {
+    const { data, error } = await supabaseClient
+      .from('wishlists')
+      .select('*')
+      .eq('id', wishlistId)
+      .eq('wishlist_user_id', userId)
+      .limit(1)
+      .single();
+
+    if (data) {
+      return Promise.resolve(true);
+    } else {
+      return Promise.resolve(false);
+    }
+  }
 }
 
 export { WishlistService };
