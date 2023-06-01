@@ -143,8 +143,6 @@ class WishlistController {
     } = await wishlistService.getItemsByWishlistId(wishlistId);
 
     console.error(wishlistItemEntitiesListError);
-    console.log(`items`);
-    console.log(wishlistItemEntitesList);
 
     const wishlistEntities = new Map<
       string,
@@ -172,9 +170,10 @@ class WishlistController {
         wishlistEntities.get(item.itemHref).marketplace_item_original_price
     );
 
+    console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
     console.log(itemsWithPriceCuts);
 
-    res.status(200).json(itemsWithPriceCuts);
+    res.status(200);
   }
 }
 
