@@ -9,7 +9,7 @@ export interface ParsedWishlistItem {
   itemTitle: string;
   itemMaker: string;
   itemHref: string;
-  itemCurrentPrice?: string;
+  itemCurrentPrice?: number;
   itemImageUrl?: string;
 }
 
@@ -90,7 +90,7 @@ class WishlistService {
         itemTitle,
         itemMaker,
         itemHref,
-        itemCurrentPrice,
+        itemCurrentPrice: parseFloat(itemCurrentPrice),
       });
     });
 
@@ -109,7 +109,7 @@ class WishlistService {
     return Promise.resolve(responseData);
   }
 
-  public async fetchWishlist(wishlistUrl: string): Promise<{
+  public async fetchWishlistByUrl(wishlistUrl: string): Promise<{
     data: Database['public']['Tables']['wishlists']['Row'];
     error: PostgrestError;
   }> {
@@ -117,6 +117,20 @@ class WishlistService {
       .from('wishlists')
       .select('*', { count: 'exact' })
       .eq('wishlist_url', wishlistUrl)
+      .limit(1)
+      .single();
+
+    return Promise.resolve({ data, error });
+  }
+
+  public async fetchWishlistById(wishlistId: string): Promise<{
+    data: Database['public']['Tables']['wishlists']['Row'];
+    error: PostgrestError;
+  }> {
+    const { data, error } = await supabaseClient
+      .from('wishlists')
+      .select('*')
+      .eq('id', wishlistId)
       .limit(1)
       .single();
 
@@ -180,17 +194,28 @@ class WishlistService {
     return wishlistData.wishlishItems.items.map((item) => {
       return {
         wishlistId: wishlistId,
-        marketplace_item_current_price: parseFloat(item.itemCurrentPrice),
         marketplace_item_href: item.itemHref,
         marketplace_item_id: item.itemId,
         marketplace_item_image_url: item.itemImageUrl ?? '',
         marketplace_item_maker: item.itemMaker,
-        marketplace_item_original_price: parseFloat(item.itemCurrentPrice),
+        marketplace_item_original_price: item.itemCurrentPrice,
         marketplace_item_title: item.itemTitle,
         monitored: true,
         update_frequency: 'daily',
       };
     });
+  }
+
+  public async getItemsByWishlistId(wishlistId: string): Promise<{
+    data: Database['public']['Tables']['wishlist_items']['Row'][];
+    error: PostgrestError;
+  }> {
+    const { data, error } = await supabaseClient
+      .from('wishlist_items')
+      .select('*')
+      .eq('wishlistId', wishlistId);
+
+    return Promise.resolve({ data, error });
   }
 
   public async withlistBelongsToUser(

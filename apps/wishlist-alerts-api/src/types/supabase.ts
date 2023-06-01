@@ -9,6 +9,52 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      notifications_sent: {
+        Row: {
+          id: string
+          items_included: string[] | null
+          notification_content: Json | null
+          notification_medium: string
+          recipient_id: string
+          time_sent: string | null
+        }
+        Insert: {
+          id: string
+          items_included?: string[] | null
+          notification_content?: Json | null
+          notification_medium: string
+          recipient_id: string
+          time_sent?: string | null
+        }
+        Update: {
+          id?: string
+          items_included?: string[] | null
+          notification_content?: Json | null
+          notification_medium?: string
+          recipient_id?: string
+          time_sent?: string | null
+        }
+      }
+      price_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string | null
+          price: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id?: string | null
+          price: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string | null
+          price?: number
+        }
+      }
       user_preferences: {
         Row: {
           created_at: string | null
@@ -37,7 +83,6 @@ export interface Database {
           created_at: string | null
           id: string
           last_updated_at: string | null
-          marketplace_item_current_price: number | null
           marketplace_item_href: string
           marketplace_item_id: string
           marketplace_item_image_url: string | null
@@ -53,7 +98,6 @@ export interface Database {
           created_at?: string | null
           id?: string
           last_updated_at?: string | null
-          marketplace_item_current_price?: number | null
           marketplace_item_href: string
           marketplace_item_id: string
           marketplace_item_image_url?: string | null
@@ -69,7 +113,6 @@ export interface Database {
           created_at?: string | null
           id?: string
           last_updated_at?: string | null
-          marketplace_item_current_price?: number | null
           marketplace_item_href?: string
           marketplace_item_id?: string
           marketplace_item_image_url?: string | null

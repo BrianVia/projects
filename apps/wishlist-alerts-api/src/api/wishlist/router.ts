@@ -14,3 +14,7 @@ export const wishlistRouter = Router().use(cors());
 
 wishlistRouter.post(`/new`, wishlistController.handlePostNewWishlist);
 wishlistRouter.post('/:id/items', wishlistController.handlePostWishlistItems);
+wishlistRouter.post(
+  '/:id/analyze',
+  wishlistController.handleWishlistAnalyzeItems
+);
