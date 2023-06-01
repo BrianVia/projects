@@ -131,9 +131,7 @@ class WishlistController {
     const { data: wishlistData, error: wishlistError } =
       await wishlistService.fetchWishlistById(wishlistId);
 
-    if (wishlistError) {
-      console.log(wishlistError);
-    }
+    if (wishlistError) console.error(wishlistError);
 
     console.log(wishlistData);
 
@@ -142,15 +140,19 @@ class WishlistController {
       error: wishlistItemEntitiesListError,
     } = await wishlistService.getItemsByWishlistId(wishlistId);
 
-    console.error(wishlistItemEntitiesListError);
+    if (wishlistItemEntitiesListError)
+      console.error(wishlistItemEntitiesListError);
 
     const wishlistEntities = new Map<
       string,
       Database['public']['Tables']['wishlist_items']['Row']
     >();
-    wishlistItemEntitesList.forEach((item) => {
-      wishlistEntities.set(item.marketplace_item_href, item);
-    });
+
+    wishlistItemEntitesList
+      .filter((entity) => entity.marketplace_item_original_price !== undefined)
+      .forEach((item) => {
+        wishlistEntities.set(item.marketplace_item_href, item);
+      });
 
     console.log(`entities size: ${wishlistEntities.size}`);
 
@@ -164,11 +166,16 @@ class WishlistController {
 
     // insert price history record
 
-    const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items.filter(
-      (item) =>
-        item.itemCurrentPrice <
-        wishlistEntities.get(item.itemHref).marketplace_item_original_price
-    );
+    const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
+      .filter((item) => item.itemCurrentPrice !== undefined)
+      .filter((item) => {
+        console.log(item);
+        // need to do something with items not found in the DB
+        return (
+          item.itemCurrentPrice <
+          wishlistEntities.get(item.itemHref).marketplace_item_original_price
+        );
+      });
 
     console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
     console.log(itemsWithPriceCuts);
