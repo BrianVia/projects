@@ -1,5 +1,6 @@
 import { Logger } from '@common/logger';
 import { WishlistService } from './service';
+import { PriceHistoryService } from '../../services/priceHistory';
 
 import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
@@ -7,14 +8,10 @@ import { NextFunction, Request, Response } from 'express';
 
 const logger = new Logger();
 const wishlistService = new WishlistService();
+const authService = new AuthService();
+const priceHistoryService = new PriceHistoryService();
 
 class WishlistController {
-  authService: AuthService;
-
-  constructor(wishlistService: WishlistService, authService: AuthService) {
-    this.authService = authService;
-  }
-
   async handlePostNewWishlist(req: Request, res: Response, next: NextFunction) {
     logger.info(`received request: POST /api/v1/wishlist/new`);
     // const token = req.headers.authorization;
@@ -50,7 +47,7 @@ class WishlistController {
         );
 
       const insertWishlistItems = wishlistService.generateWishlistItemEntities(
-        wishlistData,
+        wishlistData.wishlishItems.items,
         insertWishlistData.id
       );
 
@@ -128,6 +125,8 @@ class WishlistController {
     console.log(req.params.id);
     const wishlistId = req.params.id;
 
+    const addNewItemsFound = (req.body.addNewItemsFound as boolean) ?? true;
+
     const { data: wishlistData, error: wishlistError } =
       await wishlistService.fetchWishlistById(wishlistId);
 
@@ -164,37 +163,57 @@ class WishlistController {
       `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
     );
 
-    // insert price history record
+    const itemsNotInDB = [];
 
     const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
       .filter((item) => item.itemCurrentPrice !== undefined)
       .filter((item) => {
         console.log(item);
         // need to do something with items not found in the DB
-        if (!wishlistEntities.has(item.itemHref)) return false;
+        if (!wishlistEntities.has(item.itemHref)) {
+          itemsNotInDB.push(item);
+          return false;
+        }
         return (
           item.itemCurrentPrice <
           wishlistEntities.get(item.itemHref).marketplace_item_original_price
         );
       });
 
-    const returnedData = itemsWithPriceCuts.map((item) => {
-      return {
-        ...item,
-        itemOriginalPrice: wishlistEntities.get(item.itemHref)
-          .marketplace_item_original_price,
-        discountPercentage:
-          ((wishlistEntities.get(item.itemHref)
-            .marketplace_item_original_price -
-            item.itemCurrentPrice) /
-            wishlistEntities.get(item.itemHref)
-              .marketplace_item_original_price) *
-          100,
-      };
-    });
+    if (addNewItemsFound) {
+      const newItemsToUpsert = wishlistService.generateWishlistItemEntities(
+        itemsNotInDB,
+        wishlistId
+      );
+
+      const { data: insertItemsData, error: insertItemsError } =
+        await wishlistService.upsertWishlistItems(newItemsToUpsert, wishlistId);
+    }
+
     console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
 
-    res.status(200).json({ itemsWithPriceCuts: returnedData });
+    const returnedData = itemsWithPriceCuts
+      .map((item) => {
+        return {
+          ...item,
+          itemOriginalPrice: wishlistEntities.get(item.itemHref)
+            .marketplace_item_original_price,
+          discountPercentage:
+            ((wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price -
+              item.itemCurrentPrice) /
+              wishlistEntities.get(item.itemHref)
+                .marketplace_item_original_price) *
+            100,
+        };
+      })
+      .filter((item) => item.discountPercentage > 20);
+
+    res.status(200).json({
+      itemsWithPriceCuts: returnedData,
+      discountThreshold: 20,
+      newItemsFound: itemsNotInDB,
+    });
   }
 }
 

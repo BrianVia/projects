@@ -181,17 +181,10 @@ class WishlistService {
   }
 
   public generateWishlistItemEntities(
-    wishlistData: {
-      wishlistUrl: string;
-      wishlistTitle: string;
-      wishlishItems: {
-        size: number;
-        items: ParsedWishlistItem[];
-      };
-    },
+    wishlishItems: ParsedWishlistItem[],
     wishlistId: string
   ): Database['public']['Tables']['wishlist_items']['Insert'][] {
-    return wishlistData.wishlishItems.items.map((item) => {
+    return wishlishItems.map((item) => {
       return {
         wishlistId: wishlistId,
         marketplace_item_href: item.itemHref,
