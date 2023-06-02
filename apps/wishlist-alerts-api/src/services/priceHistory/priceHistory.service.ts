@@ -59,5 +59,37 @@ class PriceHistoryService {
     console.debug(error);
     return Promise.resolve({ data, error });
   }
+
+  public async getItemLatestPrice(
+    itemId: string
+  ): Promise<
+    [Database['public']['Tables']['price_history']['Row'], PostgrestError]
+  > {
+    const { data, error } = await supabaseClient
+      .from('price_history')
+      .select('*')
+      .eq('item_id', itemId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    return Promise.resolve([data, error]);
+  }
+
+  public async getItemsLatestPrices(
+    itemIds: string[]
+  ): Promise<
+    [Database['public']['Tables']['price_history']['Row'][], PostgrestError]
+  > {
+    const { data, error } = await supabaseClient
+      .from('price_history')
+      .select('*')
+      .in('item_id', itemIds)
+      .order('created_at', { ascending: false });
+    console.log(data);
+    console.log(error);
+
+    return Promise.resolve([data, error]);
+  }
 }
 export { PriceHistoryService };

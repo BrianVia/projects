@@ -184,6 +184,19 @@ class WishlistService {
     return Promise.resolve({ data, error });
   }
 
+  public async getWishlistItemsByWishlistId(
+    wishlistId: string
+  ): Promise<
+    [Database['public']['Tables']['wishlist_items']['Row'][], PostgrestError]
+  > {
+    const { data, error } = await supabaseClient
+      .from('wishlist_items')
+      .select('*')
+      .eq('wishlistId', wishlistId);
+
+    return Promise.resolve([data, error]);
+  }
+
   public generateWishlistItemEntities(
     wishlishItems: ParsedWishlistItem[],
     wishlistId: string
@@ -203,16 +216,17 @@ class WishlistService {
     });
   }
 
-  public async getItemsByWishlistId(wishlistId: string): Promise<{
-    data: Database['public']['Tables']['wishlist_items']['Row'][];
-    error: PostgrestError;
-  }> {
+  public async getItemsByWishlistId(
+    wishlistId: string
+  ): Promise<
+    [Database['public']['Tables']['wishlist_items']['Row'][], PostgrestError]
+  > {
     const { data, error } = await supabaseClient
       .from('wishlist_items')
       .select('*')
       .eq('wishlistId', wishlistId);
 
-    return Promise.resolve({ data, error });
+    return Promise.resolve([data, error]);
   }
 
   public async withlistBelongsToUser(

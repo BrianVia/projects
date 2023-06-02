@@ -15,3 +15,7 @@ wishlistRouter.post(
   '/:id/analyze',
   wishlistController.handleWishlistAnalyzeItems
 );
+wishlistRouter.get(
+  '/:id/discounts',
+  wishlistController.handleGetWishlistCurrentDiscounts
+);

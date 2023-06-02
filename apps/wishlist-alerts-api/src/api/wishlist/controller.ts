@@ -136,10 +136,8 @@ class WishlistController {
 
     console.log(wishlistData);
 
-    const {
-      data: wishlistItemEntitesList,
-      error: wishlistItemEntitiesListError,
-    } = await wishlistService.getItemsByWishlistId(wishlistId);
+    const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
+      await wishlistService.getItemsByWishlistId(wishlistId);
 
     if (wishlistItemEntitiesListError)
       console.error(wishlistItemEntitiesListError);
@@ -265,7 +263,7 @@ class WishlistController {
     });
   }
 
-  async handleWishlistGetDiscounts(
+  async handleGetWishlistCurrentDiscounts(
     req: Request,
     res: Response,
     next: NextFunction
@@ -273,6 +271,43 @@ class WishlistController {
     logger.info(
       `received request: GET /api/v1/wishlist/${req.params.id}/discounts`
     );
+
+    const wishlistId = req.params.id;
+
+    const [wishlistItems, wishlistItemsError] =
+      await wishlistService.getItemsByWishlistId(wishlistId);
+
+    console.log(wishlistItems);
+
+    const wishlistItemsMap = new Map<
+      string,
+      Database['public']['Tables']['wishlist_items']['Row']
+    >();
+    wishlistItems.forEach((item) => {
+      wishlistItemsMap.set(item.id, item);
+    });
+
+    const [itemsLatestPrices, itemsLatestPricesError] =
+      await priceHistoryService.getItemsLatestPrices(
+        wishlistItems.map((item) => item.id)
+      );
+
+    console.log(itemsLatestPrices);
+
+    // const items
+
+    // const itemsWithPriceCuts = wishlistItems
+    //   .filter((item) => item.itemCurrentPrice !== undefined)
+    //   .filter((item) => {
+    //     if (!wishlistEntities.has(item.itemHref)) {
+    //       return false;
+    //     }
+    //     return (
+    //       item.itemCurrentPrice <
+    //       wishlistEntities.get(item.itemHref).marketplace_item_original_price
+    //     );
+    //   });
+
     res.status(200).json({ message: 'okay' });
   }
 }
