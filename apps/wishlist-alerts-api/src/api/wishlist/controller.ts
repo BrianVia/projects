@@ -129,7 +129,7 @@ class WishlistController {
 
     const addNewItemsFound = (req.body.addNewItemsFound as boolean) ?? true;
 
-    const { data: wishlistData, error: wishlistError } =
+    const [wishlistData, wishlistError] =
       await wishlistService.fetchWishlistById(wishlistId);
 
     if (wishlistError) console.error(wishlistError);
@@ -205,9 +205,6 @@ class WishlistController {
         };
       });
 
-    console.log('got here 1');
-    console.log(priceHistoryRecords);
-
     const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
       await priceHistoryService.insertItemPriceHistoryRecords(
         priceHistoryRecords
@@ -266,6 +263,17 @@ class WishlistController {
       discountThreshold: 20,
       newItemsFound: itemsNotInDB,
     });
+  }
+
+  async handleWishlistGetDiscounts(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    logger.info(
+      `received request: GET /api/v1/wishlist/${req.params.id}/discounts`
+    );
+    res.status(200).json({ message: 'okay' });
   }
 }
 

@@ -123,10 +123,14 @@ class WishlistService {
     return Promise.resolve({ data, error });
   }
 
-  public async fetchWishlistById(wishlistId: string): Promise<{
-    data: Database['public']['Tables']['wishlists']['Row'];
-    error: PostgrestError;
-  }> {
+  public async fetchWishlistById(
+    wishlistId: string
+  ): Promise<
+    [
+      data: Database['public']['Tables']['wishlists']['Row'],
+      error: PostgrestError
+    ]
+  > {
     const { data, error } = await supabaseClient
       .from('wishlists')
       .select('*')
@@ -134,7 +138,7 @@ class WishlistService {
       .limit(1)
       .single();
 
-    return Promise.resolve({ data, error });
+    return Promise.resolve([data, error]);
   }
 
   public async insertNewWishlist(
