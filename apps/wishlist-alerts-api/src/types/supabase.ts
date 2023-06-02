@@ -38,18 +38,21 @@ export interface Database {
       price_history: {
         Row: {
           created_at: string | null
+          discount_percentage: number | null
           id: string
           item_id: string | null
           price: number
         }
         Insert: {
           created_at?: string | null
+          discount_percentage?: number | null
           id?: string
           item_id?: string | null
           price: number
         }
         Update: {
           created_at?: string | null
+          discount_percentage?: number | null
           id?: string
           item_id?: string | null
           price?: number
