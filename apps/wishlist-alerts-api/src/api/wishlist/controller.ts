@@ -153,11 +153,32 @@ class WishlistController {
         wishlistEntities.set(item.marketplace_item_href, item);
       });
 
-    console.log(`entities size: ${wishlistEntities.size}`);
+    console.log(`items in DB: ${wishlistEntities.size}`);
 
     const currentWishlistItems = await wishlistService.parseWishlist(
       wishlistData.wishlist_url
     );
+
+    const priceHistoryRecords = currentWishlistItems.wishlishItems.items.map(
+      (item) => {
+        return {
+          itemId: wishlistEntities.get(item.itemHref).id,
+          itemPrice: item.itemCurrentPrice,
+          discountPercentage:
+            ((wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price -
+              item.itemCurrentPrice) /
+              wishlistEntities.get(item.itemHref)
+                .marketplace_item_original_price) *
+            100,
+        };
+      }
+    );
+
+    const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
+      await priceHistoryService.insertItemPriceHistoryRecords(
+        priceHistoryRecords
+      );
 
     console.log(
       `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
@@ -168,8 +189,6 @@ class WishlistController {
     const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
       .filter((item) => item.itemCurrentPrice !== undefined)
       .filter((item) => {
-        console.log(item);
-        // need to do something with items not found in the DB
         if (!wishlistEntities.has(item.itemHref)) {
           itemsNotInDB.push(item);
           return false;
@@ -210,7 +229,7 @@ class WishlistController {
       .filter((item) => item.discountPercentage > 20);
 
     res.status(200).json({
-      itemsWithPriceCuts: returnedData,
+      itemsWithPriceCutsBelowThreshold: returnedData,
       discountThreshold: 20,
       newItemsFound: itemsNotInDB,
     });
