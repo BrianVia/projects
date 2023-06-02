@@ -171,16 +171,30 @@ class WishlistController {
       .filter((item) => {
         console.log(item);
         // need to do something with items not found in the DB
+        if (!wishlistEntities.has(item.itemHref)) return false;
         return (
           item.itemCurrentPrice <
           wishlistEntities.get(item.itemHref).marketplace_item_original_price
         );
       });
 
+    const returnedData = itemsWithPriceCuts.map((item) => {
+      return {
+        ...item,
+        itemOriginalPrice: wishlistEntities.get(item.itemHref)
+          .marketplace_item_original_price,
+        discountPercentage:
+          ((wishlistEntities.get(item.itemHref)
+            .marketplace_item_original_price -
+            item.itemCurrentPrice) /
+            wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price) *
+          100,
+      };
+    });
     console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
-    console.log(itemsWithPriceCuts);
 
-    res.status(200);
+    res.status(200).json({ itemsWithPriceCuts: returnedData });
   }
 }
 
