@@ -32,18 +32,31 @@ class PriceHistoryService {
       discountPercentage?: number;
     }[]
   ): Promise<{
-    data: Database['public']['Tables']['price_history']['Insert'];
+    data: Database['public']['Tables']['price_history']['Insert'][];
     error: PostgrestError;
   }> {
-    const { data, error } = await supabaseClient.from('price_history').insert(
-      items.map((item) => {
+    console.log('inserting items into price history table');
+
+    const insertRecordsPayload = items
+      .filter((item) => item.itemPrice != undefined)
+      .map((item) => {
+        console.log(item);
         return {
           item_id: item.itemId,
           price: item.itemPrice,
-          discount_percentage: item.discountPercentage,
+          discount_percentage: item.discountPercentage ?? 0,
         };
-      })
-    );
+      });
+
+    console.log(insertRecordsPayload.filter((item) => item.price === null));
+
+    const { data, error } = await supabaseClient
+      .from('price_history')
+      .insert(insertRecordsPayload)
+      .select('*');
+
+    console.debug(data);
+    console.debug(error);
     return Promise.resolve({ data, error });
   }
 }

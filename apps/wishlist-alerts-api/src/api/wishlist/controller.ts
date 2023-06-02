@@ -121,8 +121,10 @@ class WishlistController {
     res: Response,
     next: NextFunction
   ) {
-    logger.info(`received request: POST /api/v1/wishlist/:id/analyze`);
-    console.log(req.params.id);
+    logger.info(
+      `received request: POST /api/v1/wishlist/${req.params.id}/analyze`
+    );
+
     const wishlistId = req.params.id;
 
     const addNewItemsFound = (req.body.addNewItemsFound as boolean) ?? true;
@@ -148,7 +150,7 @@ class WishlistController {
     >();
 
     wishlistItemEntitesList
-      .filter((entity) => entity.marketplace_item_original_price !== undefined)
+      .filter((entity) => entity.marketplace_item_original_price != undefined)
       .forEach((item) => {
         wishlistEntities.set(item.marketplace_item_href, item);
       });
@@ -159,8 +161,37 @@ class WishlistController {
       wishlistData.wishlist_url
     );
 
-    const priceHistoryRecords = currentWishlistItems.wishlishItems.items.map(
-      (item) => {
+    const itemsWithValidPrices =
+      currentWishlistItems.wishlishItems.items.filter(
+        (item) =>
+          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
+      );
+
+    console.log(
+      `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
+    );
+    console.log(
+      `items with valid prices from wishlist: ${itemsWithValidPrices.length}`
+    );
+
+    const itemsNotInDB = [];
+
+    console.log('compiling price history records');
+    const priceHistoryRecords = itemsWithValidPrices
+      .filter(
+        (item) =>
+          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
+      )
+      .filter((item) => {
+        if (!wishlistEntities.has(item.itemHref)) {
+          itemsNotInDB.push(item);
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .map((item) => {
+        console.log(item);
         return {
           itemId: wishlistEntities.get(item.itemHref).id,
           itemPrice: item.itemCurrentPrice,
@@ -172,8 +203,10 @@ class WishlistController {
                 .marketplace_item_original_price) *
             100,
         };
-      }
-    );
+      });
+
+    console.log('got here 1');
+    console.log(priceHistoryRecords);
 
     const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
       await priceHistoryService.insertItemPriceHistoryRecords(
@@ -181,16 +214,16 @@ class WishlistController {
       );
 
     console.log(
-      `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
+      `price history records inserted: ${priceHistoryInsertData.length}`
     );
+    console.debug(priceHistoryInsertData);
 
-    const itemsNotInDB = [];
+    if (priceHistoryInsertError) console.error(priceHistoryInsertError);
 
     const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
       .filter((item) => item.itemCurrentPrice !== undefined)
       .filter((item) => {
         if (!wishlistEntities.has(item.itemHref)) {
-          itemsNotInDB.push(item);
           return false;
         }
         return (

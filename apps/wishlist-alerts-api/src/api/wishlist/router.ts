@@ -5,10 +5,7 @@ import { Logger } from '@common/logger';
 import { WishlistService } from './service';
 import { AuthService } from '../../lib/auth';
 
-const wishlistService = new WishlistService();
-const authService = new AuthService();
-
-const wishlistController = new WishlistController(wishlistService, authService);
+const wishlistController = new WishlistController();
 
 export const wishlistRouter = Router().use(cors());
 
