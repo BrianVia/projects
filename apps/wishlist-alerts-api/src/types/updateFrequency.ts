@@ -1,1 +1,1 @@
-export type updateFrequency = 'hourly' | 'daily' | 'weekly';
+export type UpdateFrequency = 'hourly' | 'daily' | 'weekly';

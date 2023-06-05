@@ -22,6 +22,14 @@ const supabaseClient = createClient<Database>(
 const priceHistoryService = new PriceHistoryService();
 
 class WishlistService {
+  public async getAllWishlists(): Promise<
+    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+  > {
+    const { data, error } = await supabaseClient.from('wishlists').select('*');
+
+    return Promise.resolve([data, error]);
+  }
+
   public async parseWishlist(wishlistUrl: string): Promise<{
     wishlistUrl: string;
     wishlistTitle: string;
