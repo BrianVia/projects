@@ -3,6 +3,7 @@ import cheerio from 'cheerio';
 
 import { PostgrestError, createClient } from '@supabase/supabase-js';
 import { Database } from '../../types/supabase';
+import { PriceHistoryService } from '../../services/priceHistory';
 
 export interface ParsedWishlistItem {
   itemId: string;
@@ -17,6 +18,8 @@ const supabaseClient = createClient<Database>(
   process.env.WISHLIST_ALERTS_SUPABASE_URL,
   process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
 );
+
+const priceHistoryService = new PriceHistoryService();
 
 class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
@@ -246,6 +249,158 @@ class WishlistService {
     } else {
       return Promise.resolve(false);
     }
+  }
+
+  public async analyzeWishlist(
+    wishlistId: string,
+    addNewItemsFound = false
+  ): Promise<{
+    itemsWithPriceCutsBelowThreshold: {
+      itemOriginalPrice: number;
+      discountPercentage: number;
+      itemId: string;
+      itemTitle: string;
+      itemMaker: string;
+      itemHref: string;
+      itemCurrentPrice?: number;
+      itemImageUrl?: string;
+    }[];
+    discountThreshold: number;
+    newItemsFound: Database['public']['Tables']['wishlist_items']['Insert'][];
+  }> {
+    const [wishlistData, wishlistError] = await this.fetchWishlistById(
+      wishlistId
+    );
+
+    if (wishlistError) console.error(wishlistError);
+
+    console.log(wishlistData);
+
+    const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
+      await this.getItemsByWishlistId(wishlistId);
+
+    if (wishlistItemEntitiesListError)
+      console.error(wishlistItemEntitiesListError);
+
+    const wishlistEntities = new Map<
+      string,
+      Database['public']['Tables']['wishlist_items']['Row']
+    >();
+
+    wishlistItemEntitesList
+      .filter((entity) => entity.marketplace_item_original_price != undefined)
+      .forEach((item) => {
+        wishlistEntities.set(item.marketplace_item_href, item);
+      });
+
+    console.log(`items in DB: ${wishlistEntities.size}`);
+
+    const currentWishlistItems = await this.parseWishlist(
+      wishlistData.wishlist_url
+    );
+
+    const itemsWithValidPrices =
+      currentWishlistItems.wishlishItems.items.filter(
+        (item) =>
+          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
+      );
+
+    console.log(
+      `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
+    );
+    console.log(
+      `items with valid prices from wishlist: ${itemsWithValidPrices.length}`
+    );
+
+    const itemsNotInDB = [];
+
+    console.log('compiling price history records');
+    const priceHistoryRecords = itemsWithValidPrices
+      .filter(
+        (item) =>
+          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
+      )
+      .filter((item) => {
+        if (!wishlistEntities.has(item.itemHref)) {
+          itemsNotInDB.push(item);
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .map((item) => {
+        console.log(item);
+        return {
+          itemId: wishlistEntities.get(item.itemHref).id,
+          itemPrice: item.itemCurrentPrice,
+          discountPercentage:
+            ((wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price -
+              item.itemCurrentPrice) /
+              wishlistEntities.get(item.itemHref)
+                .marketplace_item_original_price) *
+            100,
+        };
+      });
+
+    const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
+      await priceHistoryService.insertItemPriceHistoryRecords(
+        priceHistoryRecords
+      );
+
+    console.log(
+      `price history records inserted: ${priceHistoryInsertData.length}`
+    );
+    console.debug(priceHistoryInsertData);
+
+    if (priceHistoryInsertError) console.error(priceHistoryInsertError);
+
+    const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
+      .filter((item) => item.itemCurrentPrice !== undefined)
+      .filter((item) => {
+        if (!wishlistEntities.has(item.itemHref)) {
+          return false;
+        }
+        return (
+          item.itemCurrentPrice <
+          wishlistEntities.get(item.itemHref).marketplace_item_original_price
+        );
+      });
+
+    if (addNewItemsFound) {
+      const newItemsToUpsert = this.generateWishlistItemEntities(
+        itemsNotInDB,
+        wishlistId
+      );
+
+      const { data: insertItemsData, error: insertItemsError } =
+        await this.upsertWishlistItems(newItemsToUpsert, wishlistId);
+    }
+
+    console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
+
+    const returnedData = itemsWithPriceCuts
+      .map((item) => {
+        return {
+          ...item,
+          itemOriginalPrice: wishlistEntities.get(item.itemHref)
+            .marketplace_item_original_price,
+          discountPercentage:
+            ((wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price -
+              item.itemCurrentPrice) /
+              wishlistEntities.get(item.itemHref)
+                .marketplace_item_original_price) *
+            100,
+        };
+      })
+      .filter((item) => item.discountPercentage > 20);
+
+    return Promise.resolve({
+      itemsWithPriceCutsBelowThreshold: returnedData,
+      discountThreshold: 20,
+      newItemsFound: itemsNotInDB,
+    });
   }
 }
 

@@ -130,138 +130,19 @@ class WishlistController {
 
     const addNewItemsFound = (req.body.addNewItemsFound as boolean) ?? true;
 
-    const [wishlistData, wishlistError] =
-      await wishlistService.fetchWishlistById(wishlistId);
+    const {
+      itemsWithPriceCutsBelowThreshold,
+      discountThreshold,
+      newItemsFound,
+    } = await wishlistService.analyzeWishlist(wishlistId, addNewItemsFound);
 
-    if (wishlistError) console.error(wishlistError);
-
-    console.log(wishlistData);
-
-    const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
-      await wishlistService.getItemsByWishlistId(wishlistId);
-
-    if (wishlistItemEntitiesListError)
-      console.error(wishlistItemEntitiesListError);
-
-    const wishlistEntities = new Map<
-      string,
-      Database['public']['Tables']['wishlist_items']['Row']
-    >();
-
-    wishlistItemEntitesList
-      .filter((entity) => entity.marketplace_item_original_price != undefined)
-      .forEach((item) => {
-        wishlistEntities.set(item.marketplace_item_href, item);
+    res
+      .status(200)
+      .json({
+        itemsWithPriceCutsBelowThreshold,
+        discountThreshold,
+        newItemsFound,
       });
-
-    console.log(`items in DB: ${wishlistEntities.size}`);
-
-    const currentWishlistItems = await wishlistService.parseWishlist(
-      wishlistData.wishlist_url
-    );
-
-    const itemsWithValidPrices =
-      currentWishlistItems.wishlishItems.items.filter(
-        (item) =>
-          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
-      );
-
-    console.log(
-      `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
-    );
-    console.log(
-      `items with valid prices from wishlist: ${itemsWithValidPrices.length}`
-    );
-
-    const itemsNotInDB = [];
-
-    console.log('compiling price history records');
-    const priceHistoryRecords = itemsWithValidPrices
-      .filter(
-        (item) =>
-          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
-      )
-      .filter((item) => {
-        if (!wishlistEntities.has(item.itemHref)) {
-          itemsNotInDB.push(item);
-          return false;
-        } else {
-          return true;
-        }
-      })
-      .map((item) => {
-        console.log(item);
-        return {
-          itemId: wishlistEntities.get(item.itemHref).id,
-          itemPrice: item.itemCurrentPrice,
-          discountPercentage:
-            ((wishlistEntities.get(item.itemHref)
-              .marketplace_item_original_price -
-              item.itemCurrentPrice) /
-              wishlistEntities.get(item.itemHref)
-                .marketplace_item_original_price) *
-            100,
-        };
-      });
-
-    const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
-      await priceHistoryService.insertItemPriceHistoryRecords(
-        priceHistoryRecords
-      );
-
-    console.log(
-      `price history records inserted: ${priceHistoryInsertData.length}`
-    );
-    console.debug(priceHistoryInsertData);
-
-    if (priceHistoryInsertError) console.error(priceHistoryInsertError);
-
-    const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
-      .filter((item) => item.itemCurrentPrice !== undefined)
-      .filter((item) => {
-        if (!wishlistEntities.has(item.itemHref)) {
-          return false;
-        }
-        return (
-          item.itemCurrentPrice <
-          wishlistEntities.get(item.itemHref).marketplace_item_original_price
-        );
-      });
-
-    if (addNewItemsFound) {
-      const newItemsToUpsert = wishlistService.generateWishlistItemEntities(
-        itemsNotInDB,
-        wishlistId
-      );
-
-      const { data: insertItemsData, error: insertItemsError } =
-        await wishlistService.upsertWishlistItems(newItemsToUpsert, wishlistId);
-    }
-
-    console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
-
-    const returnedData = itemsWithPriceCuts
-      .map((item) => {
-        return {
-          ...item,
-          itemOriginalPrice: wishlistEntities.get(item.itemHref)
-            .marketplace_item_original_price,
-          discountPercentage:
-            ((wishlistEntities.get(item.itemHref)
-              .marketplace_item_original_price -
-              item.itemCurrentPrice) /
-              wishlistEntities.get(item.itemHref)
-                .marketplace_item_original_price) *
-            100,
-        };
-      })
-      .filter((item) => item.discountPercentage > 20);
-
-    res.status(200).json({
-      itemsWithPriceCutsBelowThreshold: returnedData,
-      discountThreshold: 20,
-      newItemsFound: itemsNotInDB,
-    });
   }
 
   async handleGetWishlistCurrentDiscounts(
@@ -313,20 +194,6 @@ class WishlistController {
       (item) => item.discountPercentage > 20
     );
     res.status(200).json({ items: finalDiscountedItems });
-
-    // const items
-
-    // const itemsWithPriceCuts = wishlistItems
-    //   .filter((item) => item.itemCurrentPrice !== undefined)
-    //   .filter((item) => {
-    //     if (!wishlistEntities.has(item.itemHref)) {
-    //       return false;
-    //     }
-    //     return (
-    //       item.itemCurrentPrice <
-    //       wishlistEntities.get(item.itemHref).marketplace_item_original_price
-    //     );
-    //   });
   }
 }
 
