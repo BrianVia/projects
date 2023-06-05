@@ -73,6 +73,10 @@ class PriceHistoryService {
       .limit(1)
       .single();
 
+    console.log(itemId);
+    console.log(data);
+    console.log(error);
+
     return Promise.resolve([data, error]);
   }
 

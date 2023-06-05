@@ -5,6 +5,7 @@ import { PriceHistoryService } from '../../services/priceHistory';
 import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
 import { NextFunction, Request, Response } from 'express';
+import { val } from 'cheerio/lib/api/attributes';
 
 const logger = new Logger();
 const wishlistService = new WishlistService();
@@ -277,7 +278,7 @@ class WishlistController {
     const [wishlistItems, wishlistItemsError] =
       await wishlistService.getItemsByWishlistId(wishlistId);
 
-    console.log(wishlistItems);
+    // console.log(wishlistItems);
 
     const wishlistItemsMap = new Map<
       string,
@@ -287,12 +288,31 @@ class WishlistController {
       wishlistItemsMap.set(item.id, item);
     });
 
-    const [itemsLatestPrices, itemsLatestPricesError] =
-      await priceHistoryService.getItemsLatestPrices(
-        wishlistItems.map((item) => item.id)
-      );
+    const itemsWithLatestPrices = await wishlistItems.map(async (item) => {
+      const [itemLatestPrice, itemsLatestPriceError] =
+        await priceHistoryService.getItemLatestPrice(item.id);
+      if (itemsLatestPriceError) {
+        console.error(itemsLatestPriceError);
+        return {
+          ...item,
+          latestPrice: item.marketplace_item_original_price ?? null,
+          discountPercentage: 0,
+        };
+      } else {
+        return {
+          ...item,
+          latestPrice: itemLatestPrice.price,
+          discountPercentage: itemLatestPrice.discount_percentage,
+        };
+      }
+    });
 
-    console.log(itemsLatestPrices);
+    const finalItems = await Promise.all(itemsWithLatestPrices);
+
+    const finalDiscountedItems = finalItems.filter(
+      (item) => item.discountPercentage > 20
+    );
+    res.status(200).json({ items: finalDiscountedItems });
 
     // const items
 
@@ -307,8 +327,6 @@ class WishlistController {
     //       wishlistEntities.get(item.itemHref).marketplace_item_original_price
     //     );
     //   });
-
-    res.status(200).json({ message: 'okay' });
   }
 }
 
