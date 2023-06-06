@@ -79,6 +79,9 @@ class WishlistService {
     items.each((index, item) => {
       const itemId: string = $(item).data('itemid') as string;
       const itemTitle = $(item).find('a.a-link-normal').attr('title') as string;
+
+      console.log(`item title: ${itemTitle}`);
+      // console.log(item);
       //find item by ID and get the maker;
 
       const itemMaker: string = $(item)
@@ -91,10 +94,20 @@ class WishlistService {
         .find('a.a-link-normal')
         .attr('href')}` as string;
 
-      const itemCurrentPrice = $(item)
-        .find('span.a-offscreen')
+      const itemCurrentPriceWhole = $(item)
+        .find('span.a-price-whole')
         .text()
-        .replace('$', '') as string;
+        .replace('$', '')
+        .replace(',', '') as string;
+
+      const itemCurrentPriceFractional = $(item)
+        .find('span.a-price-fraction')
+        .text() as string;
+
+      const itemCurrentPrice = `${itemCurrentPriceWhole}${itemCurrentPriceFractional}`;
+
+      console.log(itemCurrentPrice);
+      console.log(parseFloat(itemCurrentPrice));
 
       results.push({
         itemId,
@@ -313,16 +326,7 @@ class WishlistService {
           item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
       );
 
-    console.log(
-      `current wishlist items length: ${currentWishlistItems.wishlishItems.items.length}`
-    );
-    console.log(
-      `items with valid prices from wishlist: ${itemsWithValidPrices.length}`
-    );
-
     const itemsNotInDB = [];
-
-    console.log('compiling price history records');
     const priceHistoryRecords = itemsWithValidPrices
       .filter(
         (item) =>
@@ -356,11 +360,6 @@ class WishlistService {
         priceHistoryRecords
       );
 
-    console.log(
-      `price history records inserted: ${priceHistoryInsertData.length}`
-    );
-    console.debug(priceHistoryInsertData);
-
     if (priceHistoryInsertError) console.error(priceHistoryInsertError);
 
     const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
@@ -384,8 +383,6 @@ class WishlistService {
       const { data: insertItemsData, error: insertItemsError } =
         await this.upsertWishlistItems(newItemsToUpsert, wishlistId);
     }
-
-    console.log(`items with price cuts: ${itemsWithPriceCuts.length}`);
 
     const returnedData = itemsWithPriceCuts
       .map((item) => {
