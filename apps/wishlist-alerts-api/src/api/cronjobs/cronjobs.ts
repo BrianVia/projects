@@ -1,6 +1,5 @@
 import * as cron from 'node-cron';
 
-import { sendEmails } from '@wordly-domains/email';
 import { MonitoringService } from '../../services/monitoring';
 
 const monitoringService = new MonitoringService();
