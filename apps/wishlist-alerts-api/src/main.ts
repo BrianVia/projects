@@ -12,8 +12,6 @@ import { Logger } from '@common/logger';
 import { wishlistRouter } from './api/wishlist/router';
 import { MonitoringService } from './services/monitoring';
 import { cronjobs } from './api/cronjobs/cronjobs';
-// import { sendEmails } from '@wordly-domains/email';
-// import { loadDomains } from '@wordly-domains/data';
 
 const allowedOrigins = ['http://localhost:4200', 'https://wishlistalerts.io'];
 const app = express();
