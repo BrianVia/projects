@@ -28,6 +28,8 @@ const logger = new Logger();
 app.use('/api/v1/wishlist', wishlistRouter);
 
 const cronHandler = new cronjobs();
+
+console.log('Cron jobs scheduled to run...');
 cronHandler.scheduleJobs();
 
 //
