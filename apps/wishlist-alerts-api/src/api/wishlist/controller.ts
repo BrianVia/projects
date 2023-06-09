@@ -25,6 +25,11 @@ class WishlistController {
     // }
 
     const wishlistUrl: string = req.body.wishlistUrl as string;
+
+    if (!wishlistUrl.startsWith(`https://www.amazon.com/hz/wishlist/`)) {
+      res.status(400).json('invalid wishlist url');
+    }
+
     const addAllItems: boolean = req.body.addAllItems as boolean;
     logger.debug(`wishlistUrl: ${wishlistUrl}`);
     const wishlistData = await wishlistService.parseWishlist(wishlistUrl);
@@ -136,13 +141,11 @@ class WishlistController {
       newItemsFound,
     } = await wishlistService.analyzeWishlist(wishlistId, addNewItemsFound);
 
-    res
-      .status(200)
-      .json({
-        itemsWithPriceCutsBelowThreshold,
-        discountThreshold,
-        newItemsFound,
-      });
+    res.status(200).json({
+      itemsWithPriceCutsBelowThreshold,
+      discountThreshold,
+      newItemsFound,
+    });
   }
 
   async handleGetWishlistCurrentDiscounts(
