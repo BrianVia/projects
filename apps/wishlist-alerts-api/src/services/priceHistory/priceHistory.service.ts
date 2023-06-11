@@ -38,7 +38,7 @@ class PriceHistoryService {
     console.log('inserting items into price history table');
 
     const insertRecordsPayload = items
-      .filter((item) => item.itemPrice != undefined)
+      .filter((item) => item.itemPrice != undefined && item.itemPrice != null)
       .map((item) => {
         console.log(item);
         return {
@@ -55,8 +55,8 @@ class PriceHistoryService {
       .insert(insertRecordsPayload)
       .select('*');
 
-    console.debug(data);
-    console.debug(error);
+    // console.debug(data);
+    // console.debug(error);
     return Promise.resolve({ data, error });
   }
 

@@ -30,6 +30,8 @@ const cronHandler = new cronjobs();
 console.log('Cron jobs scheduled to run...');
 cronHandler.scheduleJobs();
 
+// monitoringService.monitorWishlists('daily');
+
 //
 
 const port = process.env.PORT || 8080;
