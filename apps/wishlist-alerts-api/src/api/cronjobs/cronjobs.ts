@@ -9,7 +9,7 @@ export class cronjobs {
     console.log('Scheduling cron jobs...');
 
     console.log('Monitoring Wishlists Daily at 6:30 AM');
-    cron.schedule('30 6 * * *', () => {
+    cron.schedule('15 21 * * *', () => {
       monitoringService.monitorWishlists('daily');
     });
   }

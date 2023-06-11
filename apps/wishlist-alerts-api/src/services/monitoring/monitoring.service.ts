@@ -13,12 +13,22 @@ class MonitoringService {
     const [allWishlists, allWishlistsError] =
       await wishlistService.getAllWishlists();
 
-    allWishlists.forEach(async (wishlist) => {
+    await allWishlists.forEach(async (wishlist) => {
+      console.log(
+        `Time: ${Date.now().toLocaleString()} - Analyzing wishlist ${
+          wishlist.id
+        } - ${wishlist.name}.}`
+      );
       const {
         itemsWithPriceCutsBelowThreshold,
         discountThreshold,
         newItemsFound,
       } = await wishlistService.analyzeWishlist(wishlist.id, true);
+      console.log(
+        `Time: ${Date.now().toLocaleString()} -analyzing wishlist ${
+          wishlist.id
+        } complete.`
+      );
     });
 
     return Promise.resolve(true);

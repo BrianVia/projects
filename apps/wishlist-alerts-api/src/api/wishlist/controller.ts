@@ -198,6 +198,14 @@ class WishlistController {
     );
     res.status(200).json({ items: finalDiscountedItems });
   }
+
+  async handleAnalyzeAllWishlists(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    console.log('test');
+  }
 }
 
 export { WishlistController };
