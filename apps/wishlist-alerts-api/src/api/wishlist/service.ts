@@ -45,7 +45,7 @@ class WishlistService {
     const page = await browser.newPage();
     await page.setDefaultNavigationTimeout(0);
 
-    await page.goto(wishlistUrl, { waitUntil: 'load' });
+    await page.goto(wishlistUrl, { waitUntil: 'load', timeout: 0 });
 
     let previousHeight = 0;
     // eslint-disable-next-line no-constant-condition
