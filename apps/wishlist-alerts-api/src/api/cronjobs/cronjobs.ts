@@ -9,9 +9,9 @@ export class cronjobs {
     console.log('Scheduling cron jobs...');
 
     console.log('Monitoring Wishlists Daily at 6:30 AM');
-    cron.schedule('30 11 * * *', () => {
+    cron.schedule('* * * * *', async () => {
       // UTC Time
-      monitoringService.monitorWishlists('daily');
+      const ran = await monitoringService.monitorWishlists('daily');
     });
   }
 }
