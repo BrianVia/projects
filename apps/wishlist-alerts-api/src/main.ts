@@ -30,12 +30,11 @@ const cronHandler = new cronjobs();
 console.log('Cron jobs scheduled to run...');
 cronHandler.scheduleJobs();
 
-// monitoringService.monitorWishlists('daily');
-
-//
+monitoringService.monitorWishlists('daily'); // Just run at startup in the meantime
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   logger.info(`Listening at http://localhost:${port}/api`);
 });
+
 server.on('error', logger.error);
