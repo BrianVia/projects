@@ -326,15 +326,13 @@ class WishlistService {
     const itemsWithValidPrices =
       currentWishlistItems.wishlishItems.items.filter(
         (item) =>
-          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
+          item.itemCurrentPrice !== undefined &&
+          item.itemCurrentPrice !== null &&
+          !Number.isNaN(item.itemCurrentPrice)
       );
 
     const itemsNotInDB = [];
     const priceHistoryRecords = itemsWithValidPrices
-      .filter(
-        (item) =>
-          item.itemCurrentPrice !== undefined && item.itemCurrentPrice !== null
-      )
       .filter((item) => {
         if (!wishlistEntities.has(item.itemHref)) {
           itemsNotInDB.push(item);

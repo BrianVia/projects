@@ -38,7 +38,12 @@ class PriceHistoryService {
     console.log('inserting items into price history table');
 
     const insertRecordsPayload = items
-      .filter((item) => item.itemPrice != undefined && item.itemPrice != null)
+      .filter(
+        (item) =>
+          item.itemPrice != undefined &&
+          item.itemPrice != null &&
+          !Number.isNaN(item.itemPrice)
+      )
       .map((item) => {
         console.log(item);
         return {

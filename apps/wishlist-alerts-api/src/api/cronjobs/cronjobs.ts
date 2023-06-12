@@ -8,10 +8,17 @@ export class cronjobs {
   scheduleJobs() {
     console.log('Scheduling cron jobs...');
 
-    console.log('Monitoring Wishlists Daily at 2:00 AM UTC');
-    cron.schedule('0 * * * *', async () => {
-      // UTC Time
-      const ran = await monitoringService.monitorWishlists('daily');
-    });
+    console.log('Monitoring Wishlists Daily at Midnight EST');
+    cron.schedule(
+      '0 * * * *',
+      () => {
+        // UTC Time
+        monitoringService.monitorWishlists('daily');
+      },
+      {
+        scheduled: true,
+        timezone: 'America/New_York',
+      }
+    );
   }
 }
