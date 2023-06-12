@@ -13,7 +13,8 @@ class MonitoringService {
     const [allWishlists, allWishlistsError] =
       await wishlistService.getAllWishlists();
 
-    const allDonePromises = await allWishlists.map(async (wishlist) => {
+    const allDonePromises = [];
+    for (const wishlist of allWishlists) {
       console.log(
         `Time: ${new Date().toLocaleString()} - Analyzing wishlist ${
           wishlist.id
@@ -32,8 +33,11 @@ class MonitoringService {
 
       // TODO send results to user
 
-      return Promise.resolve(true);
-    });
+      allDonePromises.push(Promise.resolve(true));
+      console.log(
+        'All done with wishlist ID: ' + wishlist.id + ' - ' + wishlist.name
+      );
+    }
 
     const allDone = (await Promise.all(allDonePromises)).every(
       (prom) => prom === true
