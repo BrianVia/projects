@@ -43,6 +43,7 @@ class WishlistService {
       args: ['--no-sandbox'],
     });
     const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(0);
 
     await page.goto(wishlistUrl, { waitUntil: 'load' });
 
