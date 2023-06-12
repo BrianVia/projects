@@ -8,8 +8,8 @@ export class cronjobs {
   scheduleJobs() {
     console.log('Scheduling cron jobs...');
 
-    console.log('Monitoring Wishlists Daily at 6:30 AM');
-    cron.schedule('* * * * *', async () => {
+    console.log('Monitoring Wishlists Daily at 2:00 AM UTC');
+    cron.schedule('0 2 * * *', async () => {
       // UTC Time
       const ran = await monitoringService.monitorWishlists('daily');
     });

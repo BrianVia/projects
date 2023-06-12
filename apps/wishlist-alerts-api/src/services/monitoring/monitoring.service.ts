@@ -15,7 +15,7 @@ class MonitoringService {
 
     await allWishlists.forEach(async (wishlist) => {
       console.log(
-        `Time: ${Date.now().toLocaleString()} - Analyzing wishlist ${
+        `Time: ${new Date().toLocaleString()} - Analyzing wishlist ${
           wishlist.id
         } - ${wishlist.name}.}`
       );
@@ -25,7 +25,7 @@ class MonitoringService {
         newItemsFound,
       } = await wishlistService.analyzeWishlist(wishlist.id, true);
       console.log(
-        `Time: ${Date.now().toLocaleString()} -analyzing wishlist ${
+        `Time: ${new Date().toLocaleString()} -analyzing wishlist ${
           wishlist.id
         } complete.`
       );
