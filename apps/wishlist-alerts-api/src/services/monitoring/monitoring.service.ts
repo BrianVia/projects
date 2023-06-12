@@ -17,7 +17,7 @@ class MonitoringService {
       console.log(
         `Time: ${new Date().toLocaleString()} - Analyzing wishlist ${
           wishlist.id
-        } - ${wishlist.name}.}`
+        } - ${wishlist.name}`
       );
       const {
         itemsWithPriceCutsBelowThreshold,

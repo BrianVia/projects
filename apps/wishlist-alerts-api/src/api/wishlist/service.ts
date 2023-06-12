@@ -75,7 +75,7 @@ class WishlistService {
     const listContainer = $('ul#g-items');
 
     const items = listContainer.find('li.g-item-sortable');
-    console.log(`Found ${items.length} items`);
+    console.log(`Found ${items.length} items in wishlist HTML`);
 
     const results: ParsedWishlistItem[] = [];
 
@@ -83,7 +83,7 @@ class WishlistService {
       const itemId: string = $(item).data('itemid') as string;
       const itemTitle = $(item).find('a.a-link-normal').attr('title') as string;
 
-      console.log(`item title: ${itemTitle}`);
+      // console.log(`item title: ${itemTitle}`);
       // console.log(item);
       //find item by ID and get the maker;
 
@@ -109,8 +109,8 @@ class WishlistService {
 
       const itemCurrentPrice = `${itemCurrentPriceWhole}${itemCurrentPriceFractional}`;
 
-      console.log(itemCurrentPrice);
-      console.log(parseFloat(itemCurrentPrice));
+      // console.log(itemCurrentPrice);
+      // console.log(parseFloat(itemCurrentPrice));
 
       results.push({
         itemId,
@@ -298,7 +298,7 @@ class WishlistService {
 
     if (wishlistError) console.error(wishlistError);
 
-    console.log(wishlistData);
+    // console.log(wishlistData);
 
     const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
       await this.getItemsByWishlistId(wishlistId);
@@ -342,7 +342,7 @@ class WishlistService {
         }
       })
       .map((item) => {
-        console.log(item);
+        // console.log(item);
         return {
           itemId: wishlistEntities.get(item.itemHref).id,
           itemPrice: item.itemCurrentPrice,
