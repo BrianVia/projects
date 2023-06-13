@@ -10,7 +10,7 @@ export class cronjobs {
 
     console.log('Monitoring Wishlists Daily at Midnight EST');
     cron.schedule(
-      `@daily`,
+      `0 0 * * *`,
       () => {
         monitoringService.monitorWishlists('daily');
       },
