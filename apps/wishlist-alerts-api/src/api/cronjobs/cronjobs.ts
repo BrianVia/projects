@@ -10,7 +10,7 @@ export class cronjobs {
 
     console.log('Monitoring Wishlists Daily at Midnight EST');
     cron.schedule(
-      '0 0 * * *',
+      `@daily`,
       () => {
         monitoringService.monitorWishlists('daily');
       },
@@ -20,15 +20,17 @@ export class cronjobs {
       }
     );
 
-    // cron.schedule(
-    //   '0 * * * *',
-    //   () => {
-    //     monitoringService.monitorWishlists('hourly');
-    //   },
-    //   {
-    //     scheduled: true,
-    //     timezone: 'America/New_York',
-    //   }
-    // );
+    cron.schedule(
+      '0 * * * *',
+      () => {
+        console.log(
+          `Hourly cron job running at ${new Date().toLocaleString()}`
+        );
+      },
+      {
+        scheduled: true,
+        timezone: 'America/New_York',
+      }
+    );
   }
 }
