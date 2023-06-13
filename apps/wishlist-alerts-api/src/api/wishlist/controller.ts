@@ -206,6 +206,34 @@ class WishlistController {
   ) {
     console.log('test');
   }
+
+  async handleGetAllUserWishlists(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    // const token = req.headers.authorization;
+    // const tokenUser = await authService.getTokenUser(token);
+    // if (tokenUser) {
+    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    // } else {
+    //   logger.warn(`token user not found`);
+    //   res.status(401).send('Unauthorized');
+    // }
+
+    const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
+
+    logger.info(`received request: GET /api/v1/wishlists/user/${userId}`);
+
+    const [userWishlists, fetchWishlistsError] =
+      await wishlistService.getAllUserWishlists(userId);
+
+    if (fetchWishlistsError) {
+      logger.error(fetchWishlistsError);
+      res.status(500).json({ error: fetchWishlistsError });
+    }
+    res.status(200).json({ wishlists: userWishlists });
+  }
 }
 
 export { WishlistController };

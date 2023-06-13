@@ -409,6 +409,53 @@ class WishlistService {
       newItemsFound: itemsNotInDB,
     });
   }
+
+  public async getAllUserWishlists(
+    userId: string,
+    withItems = true,
+    withDiscounts = false
+  ): Promise<
+    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+  > {
+    const { data: userWishlists, error } = await supabaseClient
+      .from('wishlists')
+      .select('*')
+      .eq('wishlist_user_id', userId);
+
+    const userWishlistsWithItems = [];
+    if (withItems) {
+      const userWishlistItemPromises = await userWishlists.map(
+        async (wishlist) => {
+          const [wishlistItems, wishlistItemsError] =
+            await this.getItemsByWishlistId(wishlist.id);
+          return {
+            ...wishlist,
+            items: wishlistItems,
+          };
+        }
+      );
+      await Promise.all(userWishlistItemPromises).then((values) => {
+        values.forEach((value) => {
+          userWishlistsWithItems.push(value);
+        });
+      });
+
+      // return Promise.resolve([userWishlistsWithItems, error]);
+    }
+
+    const userWishlistItemsWithDiscounts = [];
+    if (withDiscounts) {
+      console.log(true);
+    }
+
+    if (error) console.error(error);
+
+    if (withItems) {
+      return Promise.resolve([userWishlistsWithItems, error]);
+    }
+
+    return Promise.resolve([userWishlists, error]);
+  }
 }
 
 export { WishlistService };

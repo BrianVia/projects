@@ -19,3 +19,8 @@ wishlistRouter.get(
   '/:id/discounts',
   wishlistController.handleGetWishlistCurrentDiscounts
 );
+
+wishlistRouter.get(
+  `/user/:userId`,
+  wishlistController.handleGetAllUserWishlists
+);
