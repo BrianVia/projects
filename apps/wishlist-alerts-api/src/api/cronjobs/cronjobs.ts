@@ -10,9 +10,8 @@ export class cronjobs {
 
     console.log('Monitoring Wishlists Daily at Midnight EST');
     cron.schedule(
-      '0 * * * *',
+      '0 0 * * *',
       () => {
-        // UTC Time
         monitoringService.monitorWishlists('daily');
       },
       {
@@ -20,5 +19,16 @@ export class cronjobs {
         timezone: 'America/New_York',
       }
     );
+
+    // cron.schedule(
+    //   '0 * * * *',
+    //   () => {
+    //     monitoringService.monitorWishlists('hourly');
+    //   },
+    //   {
+    //     scheduled: true,
+    //     timezone: 'America/New_York',
+    //   }
+    // );
   }
 }
