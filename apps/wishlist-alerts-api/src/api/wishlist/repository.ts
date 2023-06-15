@@ -5,14 +5,27 @@ import {
 } from '@supabase/supabase-js';
 import { Database } from '../../types/supabase';
 
+import { Pool } from 'pg';
+
 class WishlistRepository {
   private supabaseClient: SupabaseClient<Database>;
+  private pool: Pool;
 
   constructor() {
     this.supabaseClient = createClient<Database>(
       process.env.WISHLIST_ALERTS_SUPABASE_URL,
       process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
     );
+
+    this.pool = new Pool({
+      user: 'postgres',
+      password: process.env.WISHLIST_ALERTS_DB_PASSWORD,
+      host: 'db.cxyzkjrqsbeyafkgokgt.supabase.co',
+      port: 6543,
+      database: 'postgres',
+      ssl: { rejectUnauthorized: false }, // Needed for Supabase
+      max: 10, // Maximum number of connections in the pool
+    });
   }
 
   public async getAllWishlists(): Promise<
@@ -96,6 +109,34 @@ class WishlistRepository {
 
     return Promise.resolve([userWishlists, error]);
   }
+
+  public async getAllUserWishlistsWithItems(
+    userId: string
+  ): Promise<
+    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+  > {
+    const { data: userWishlists, error } = await this.supabaseClient
+      .from('wishlists')
+      .select('*, wishlist_items (*)')
+      .eq('wishlist_user_id', userId);
+
+    return Promise.resolve([userWishlists, error]);
+  }
+
+  public async getAllUserWishlistsWithItemsAndRecords(
+    userId: string
+  ): Promise<
+    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+  > {
+    const { data: userWishlists, error } = await this.supabaseClient
+      .from('wishlists')
+      .select('*, wishlist_items (*, price_history(*))')
+      .eq('wishlist_user_id', userId);
+
+    return Promise.resolve([userWishlists, error]);
+  }
+
+  public async getAllUserWishlistsWithItemsAndDiscounts(userId: string) {}
 }
 
 export { WishlistRepository };

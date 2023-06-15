@@ -434,82 +434,46 @@ class WishlistService {
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
-    const [userWishlists, userWishlistsError] =
-      await wishlistRepository.getAllUserWishlists(userId);
-
-    let userWishlistsWithItems = [];
-    if (withItems && !withDiscounts) {
-      const userWishlistItemPromises = userWishlists.map(async (wishlist) => {
-        const [wishlistItems, wishlistItemsError] =
-          await wishlistItemsRepository.getItemsByWishlistId(wishlist.id);
-        return {
-          ...wishlist,
-          items: await wishlistItems.filter(
-            async (item) =>
-              item.marketplace_item_original_price != null &&
-              !Number.isNaN(item.marketplace_item_original_price)
-          ),
-        };
-      });
-
-      userWishlistsWithItems = await Promise.all(userWishlistItemPromises);
-    }
-
     if (withDiscounts) {
-      const userWishlistItemsWithDiscounts = await Promise.all(
-        userWishlists.map(async (wishlist) => {
-          const [wishlistItems, wishlistItemsError] =
-            await wishlistItemsRepository.getItemsByWishlistId(wishlist.id);
-
-          const wishlistItemsWithDiscountsPromises = wishlistItems
-            .filter(
-              (item) =>
-                !Number.isNaN(item.marketplace_item_original_price) &&
-                item.marketplace_item_original_price > 0 &&
-                item.marketplace_item_original_price != undefined &&
-                item.marketplace_item_original_price != null
-            )
-            .map(async (item) => {
-              const [itemCurrentPrice, itemCurrentPriceError] =
-                await priceHistoryService.getItemLatestPrice(item.id);
-
-              const priceValue = itemCurrentPriceError
-                ? item.marketplace_item_original_price
-                : itemCurrentPrice.price;
-
-              return {
-                ...item,
-                discountPercentage:
-                  (await itemCurrentPrice.discount_percentage) ?? 0,
-              };
-            });
-
-          console.log(await wishlistItemsWithDiscountsPromises);
-
-          const itemsWithDiscounts = await Promise.all(
-            wishlistItemsWithDiscountsPromises.filter(
-              async (item) => (await item).discountPercentage > 20
-            )
-          );
-
-          return {
-            ...wishlist,
-            items: wishlistItems,
-            itemsWithDiscounts,
-          };
-        })
+      const [
+        userWishlistsWithItemsAndDiscounts,
+        userWishlistsWithItemsAndDiscountsError,
+      ] = await wishlistRepository.getAllUserWishlistsWithItemsAndRecords(
+        userId
       );
 
-      return [userWishlistItemsWithDiscounts, userWishlistsError];
+      if (userWishlistsWithItemsAndDiscountsError) {
+        console.error(userWishlistsWithItemsAndDiscountsError);
+        Promise.reject(userWishlistsWithItemsAndDiscountsError);
+      }
+
+      return Promise.resolve([
+        userWishlistsWithItemsAndDiscounts,
+        userWishlistsWithItemsAndDiscountsError,
+      ]);
+    } else if (withItems && !withDiscounts) {
+      const [userWishlistsWithItems, userWishlistsWithItemsError] =
+        await wishlistRepository.getAllUserWishlistsWithItems(userId);
+
+      if (userWishlistsWithItemsError) {
+        console.error(userWishlistsWithItemsError);
+        Promise.reject(userWishlistsWithItemsError);
+      }
+
+      return Promise.resolve([
+        userWishlistsWithItems,
+        userWishlistsWithItemsError,
+      ]);
+    } else {
+      const [userWishlists, userWishlistsError] =
+        await wishlistRepository.getAllUserWishlists(userId);
+
+      if (userWishlistsError) {
+        console.error(userWishlistsError);
+        Promise.reject(userWishlistsError);
+      }
+      return Promise.resolve([userWishlists, userWishlistsError]);
     }
-
-    if (userWishlistsError) console.error(userWishlistsError);
-
-    if (withItems) {
-      return [userWishlistsWithItems, userWishlistsError];
-    }
-
-    return [userWishlists, userWishlistsError];
   }
 }
 
