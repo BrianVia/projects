@@ -1,7 +1,9 @@
+import { WishlistRepository } from '../../api/wishlist/repository';
 import { WishlistService } from '../../api/wishlist/service';
 import { UpdateFrequency } from '../../types/updateFrequency';
 
 const wishlistService = new WishlistService();
+const wishlistRepository = new WishlistRepository();
 
 class MonitoringService {
   public async monitorWishlists(
@@ -11,7 +13,7 @@ class MonitoringService {
 
     // get all wishlists
     const [allWishlists, allWishlistsError] =
-      await wishlistService.getAllWishlists();
+      await wishlistRepository.getAllWishlists();
 
     const allDonePromises = [];
     for (const wishlist of allWishlists) {

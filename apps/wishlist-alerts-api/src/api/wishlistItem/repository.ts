@@ -1,8 +1,12 @@
-import { createClient, PostgrestError } from '@supabase/supabase-js';
+import {
+  createClient,
+  PostgrestError,
+  SupabaseClient,
+} from '@supabase/supabase-js';
 import { Database } from '../../types/supabase';
 
 class WishlistItemRepository {
-  private supabaseClient: any;
+  private supabaseClient: SupabaseClient<Database>;
 
   constructor() {
     this.supabaseClient = createClient<Database>(

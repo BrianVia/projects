@@ -4,6 +4,8 @@ import cheerio from 'cheerio';
 import { PostgrestError, createClient } from '@supabase/supabase-js';
 import { Database } from '../../types/supabase';
 import { PriceHistoryService } from '../../services/priceHistory';
+import { WishlistRepository } from './repository';
+import { WishlistItemRepository } from '../wishlistItem/repository';
 
 export interface ParsedWishlistItem {
   itemId: string;
@@ -20,16 +22,10 @@ const supabaseClient = createClient<Database>(
 );
 
 const priceHistoryService = new PriceHistoryService();
+const wishlistRepository = new WishlistRepository();
+const wishlistItemsRepository = new WishlistItemRepository();
 
 class WishlistService {
-  public async getAllWishlists(): Promise<
-    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
-  > {
-    const { data, error } = await supabaseClient.from('wishlists').select('*');
-
-    return Promise.resolve([data, error]);
-  }
-
   public async parseWishlist(wishlistUrl: string): Promise<{
     wishlistUrl: string;
     wishlistTitle: string;
@@ -302,7 +298,7 @@ class WishlistService {
     // console.log(wishlistData);
 
     const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
-      await this.getItemsByWishlistId(wishlistId);
+      await wishlistItemsRepository.getItemsByWishlistId(wishlistId);
 
     if (wishlistItemEntitiesListError)
       console.error(wishlistItemEntitiesListError);
@@ -382,8 +378,29 @@ class WishlistService {
         wishlistId
       );
 
-      const { data: insertItemsData, error: insertItemsError } =
+      const { data: insertNewItems, error: insertItemsError } =
         await this.upsertWishlistItems(newItemsToUpsert, wishlistId);
+      const newItemPriceHistoryRecords = itemsNotInDB.map((item) => {
+        // console.log(item);
+        return {
+          itemId: wishlistEntities.get(item.itemHref).id,
+          itemPrice: item.itemCurrentPrice,
+          discountPercentage:
+            ((wishlistEntities.get(item.itemHref)
+              .marketplace_item_original_price -
+              item.itemCurrentPrice) /
+              wishlistEntities.get(item.itemHref)
+                .marketplace_item_original_price) *
+            100,
+        };
+      });
+
+      const {
+        data: newItemPriceHistoryInsertData,
+        error: priceHistoryInsertError,
+      } = await priceHistoryService.insertItemPriceHistoryRecords(
+        newItemPriceHistoryRecords
+      );
     }
 
     const returnedData = itemsWithPriceCuts
@@ -413,48 +430,86 @@ class WishlistService {
   public async getAllUserWishlists(
     userId: string,
     withItems = true,
-    withDiscounts = false
+    withDiscounts = true
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
-    const { data: userWishlists, error } = await supabaseClient
-      .from('wishlists')
-      .select('*')
-      .eq('wishlist_user_id', userId);
+    const [userWishlists, userWishlistsError] =
+      await wishlistRepository.getAllUserWishlists(userId);
 
-    const userWishlistsWithItems = [];
-    if (withItems) {
-      const userWishlistItemPromises = await userWishlists.map(
-        async (wishlist) => {
+    let userWishlistsWithItems = [];
+    if (withItems && !withDiscounts) {
+      const userWishlistItemPromises = userWishlists.map(async (wishlist) => {
+        const [wishlistItems, wishlistItemsError] =
+          await wishlistItemsRepository.getItemsByWishlistId(wishlist.id);
+        return {
+          ...wishlist,
+          items: await wishlistItems.filter(
+            async (item) =>
+              item.marketplace_item_original_price != null &&
+              !Number.isNaN(item.marketplace_item_original_price)
+          ),
+        };
+      });
+
+      userWishlistsWithItems = await Promise.all(userWishlistItemPromises);
+    }
+
+    if (withDiscounts) {
+      const userWishlistItemsWithDiscounts = await Promise.all(
+        userWishlists.map(async (wishlist) => {
           const [wishlistItems, wishlistItemsError] =
-            await this.getItemsByWishlistId(wishlist.id);
+            await wishlistItemsRepository.getItemsByWishlistId(wishlist.id);
+
+          const wishlistItemsWithDiscountsPromises = wishlistItems
+            .filter(
+              (item) =>
+                !Number.isNaN(item.marketplace_item_original_price) &&
+                item.marketplace_item_original_price > 0 &&
+                item.marketplace_item_original_price != undefined &&
+                item.marketplace_item_original_price != null
+            )
+            .map(async (item) => {
+              const [itemCurrentPrice, itemCurrentPriceError] =
+                await priceHistoryService.getItemLatestPrice(item.id);
+
+              const priceValue = itemCurrentPriceError
+                ? item.marketplace_item_original_price
+                : itemCurrentPrice.price;
+
+              return {
+                ...item,
+                discountPercentage:
+                  (await itemCurrentPrice.discount_percentage) ?? 0,
+              };
+            });
+
+          console.log(await wishlistItemsWithDiscountsPromises);
+
+          const itemsWithDiscounts = await Promise.all(
+            wishlistItemsWithDiscountsPromises.filter(
+              async (item) => (await item).discountPercentage > 20
+            )
+          );
+
           return {
             ...wishlist,
             items: wishlistItems,
+            itemsWithDiscounts,
           };
-        }
+        })
       );
-      await Promise.all(userWishlistItemPromises).then((values) => {
-        values.forEach((value) => {
-          userWishlistsWithItems.push(value);
-        });
-      });
 
-      // return Promise.resolve([userWishlistsWithItems, error]);
+      return [userWishlistItemsWithDiscounts, userWishlistsError];
     }
 
-    const userWishlistItemsWithDiscounts = [];
-    if (withDiscounts) {
-      console.log(true);
-    }
-
-    if (error) console.error(error);
+    if (userWishlistsError) console.error(userWishlistsError);
 
     if (withItems) {
-      return Promise.resolve([userWishlistsWithItems, error]);
+      return [userWishlistsWithItems, userWishlistsError];
     }
 
-    return Promise.resolve([userWishlists, error]);
+    return [userWishlists, userWishlistsError];
   }
 }
 
