@@ -431,26 +431,30 @@ class WishlistService {
     userId: string,
     withItems = true,
     withDiscounts = true
-  ): Promise<
-    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
-  > {
+  ): Promise<[any, PostgrestError?]> {
     if (withDiscounts) {
-      const [
-        userWishlistsWithItemsAndDiscounts,
-        userWishlistsWithItemsAndDiscountsError,
-      ] = await wishlistRepository.getAllUserWishlistsWithItemsAndRecords(
-        userId
-      );
+      const [userWishlists, userWishlistsError] =
+        await wishlistRepository.getAllUserWishlists(userId);
 
-      if (userWishlistsWithItemsAndDiscountsError) {
-        console.error(userWishlistsWithItemsAndDiscountsError);
-        Promise.reject(userWishlistsWithItemsAndDiscountsError);
+      if (userWishlistsError) {
+        console.error(userWishlistsError);
+        Promise.reject(userWishlistsError);
       }
 
-      return Promise.resolve([
-        userWishlistsWithItemsAndDiscounts,
-        userWishlistsWithItemsAndDiscountsError,
-      ]);
+      console.log(userWishlists.map((wishlist) => wishlist.id));
+
+      const userWishlistsWithItemsAndDiscounts = [];
+      for (const wishlist of userWishlists) {
+        const wishlistData =
+          await wishlistRepository.getWishlistItemsAndDiscounts(wishlist.id);
+        console.log(wishlistData);
+        userWishlistsWithItemsAndDiscounts.push(wishlistData);
+      }
+
+      console.log('HERE');
+      console.log(userWishlistsWithItemsAndDiscounts);
+
+      return Promise.resolve([userWishlistsWithItemsAndDiscounts]);
     } else if (withItems && !withDiscounts) {
       const [userWishlistsWithItems, userWishlistsWithItemsError] =
         await wishlistRepository.getAllUserWishlistsWithItems(userId);

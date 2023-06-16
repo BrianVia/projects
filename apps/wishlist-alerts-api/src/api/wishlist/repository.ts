@@ -136,7 +136,51 @@ class WishlistRepository {
     return Promise.resolve([userWishlists, error]);
   }
 
-  public async getAllUserWishlistsWithItemsAndDiscounts(userId: string) {}
+  public async getWishlistItemsAndDiscounts(wishlistId: string): Promise<
+    {
+      created_at: string | null;
+      id: string;
+      last_updated_at: string | null;
+      marketplace_item_href: string;
+      marketplace_item_id: string;
+      marketplace_item_image_url: string | null;
+      marketplace_item_maker: string;
+      marketplace_item_original_price: number | null;
+      marketplace_item_title: string;
+      monitored: boolean;
+      referral_link: string | null;
+      update_frequency: string | null;
+      wishlistId: string;
+      discount_percentage: number | null;
+      item_id: string | null;
+      price: number;
+    }[]
+  > {
+    try {
+      const wishlistQuery = `
+        SELECT wi.*, ph.*
+        FROM wishlist_items wi
+        JOIN (
+          SELECT item_id, MAX(created_at) AS latest_created_at
+          FROM price_history
+          GROUP BY item_id
+        ) latest_ph ON wi.id = latest_ph.item_id
+        JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
+        WHERE wi."wishlistId" = '${wishlistId}';
+      `;
+
+      console.log(`query: ${wishlistQuery}`);
+
+      const client = await this.pool.connect();
+      const res = await client.query(wishlistQuery);
+      // console.log(res.rows);
+      client.release(); // Release the connection back to the pool
+      return Promise.resolve(res.rows);
+    } catch (error) {
+      console.error('Error executing query:', error);
+      return [];
+    }
+  }
 }
 
 export { WishlistRepository };
