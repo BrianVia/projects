@@ -441,18 +441,13 @@ class WishlistService {
         Promise.reject(userWishlistsError);
       }
 
-      console.log(userWishlists.map((wishlist) => wishlist.id));
-
       const userWishlistsWithItemsAndDiscounts = [];
       for (const wishlist of userWishlists) {
         const wishlistData =
           await wishlistRepository.getWishlistItemsAndDiscounts(wishlist.id);
-        console.log(wishlistData);
+
         userWishlistsWithItemsAndDiscounts.push(wishlistData);
       }
-
-      console.log('HERE');
-      console.log(userWishlistsWithItemsAndDiscounts);
 
       return Promise.resolve([userWishlistsWithItemsAndDiscounts]);
     } else if (withItems && !withDiscounts) {

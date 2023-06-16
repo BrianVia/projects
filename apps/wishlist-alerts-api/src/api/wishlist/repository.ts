@@ -173,7 +173,7 @@ class WishlistRepository {
 
       const client = await this.pool.connect();
       const res = await client.query(wishlistQuery);
-      // console.log(res.rows);
+      console.log(`Found ${res.rows.length} records`);
       client.release(); // Release the connection back to the pool
       return Promise.resolve(res.rows);
     } catch (error) {
