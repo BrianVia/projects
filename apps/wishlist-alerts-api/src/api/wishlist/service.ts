@@ -230,7 +230,7 @@ class WishlistService {
   ): Database['public']['Tables']['wishlist_items']['Insert'][] {
     return wishlishItems.map((item) => {
       return {
-        wishlistId: wishlistId,
+        wishlist_id: wishlistId,
         marketplace_item_href: item.itemHref,
         marketplace_item_id: item.itemId,
         marketplace_item_image_url: item.itemImageUrl ?? '',

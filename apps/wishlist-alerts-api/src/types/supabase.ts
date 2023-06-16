@@ -34,6 +34,14 @@ export interface Database {
           recipient_id?: string
           time_sent?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_sent_recipient_id_fkey"
+            columns: ["recipient_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       price_history: {
         Row: {
@@ -57,6 +65,14 @@ export interface Database {
           item_id?: string | null
           price?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_item_id_fkey"
+            columns: ["item_id"]
+            referencedRelation: "wishlist_items"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_preferences: {
         Row: {
@@ -80,6 +96,14 @@ export interface Database {
           notification_preferences?: Json | null
           user_id?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       wishlist_items: {
         Row: {
@@ -95,7 +119,7 @@ export interface Database {
           monitored: boolean
           referral_link: string | null
           update_frequency: string | null
-          wishlistId: string
+          wishlist_id: string
         }
         Insert: {
           created_at?: string | null
@@ -110,7 +134,7 @@ export interface Database {
           monitored?: boolean
           referral_link?: string | null
           update_frequency?: string | null
-          wishlistId: string
+          wishlist_id: string
         }
         Update: {
           created_at?: string | null
@@ -125,8 +149,16 @@ export interface Database {
           monitored?: boolean
           referral_link?: string | null
           update_frequency?: string | null
-          wishlistId?: string
+          wishlist_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_wishlist_id_fkey"
+            columns: ["wishlist_id"]
+            referencedRelation: "wishlists"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       wishlists: {
         Row: {
@@ -162,6 +194,14 @@ export interface Database {
           wishlist_url?: string | null
           wishlist_user_id?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_wishlist_user_id_fkey"
+            columns: ["wishlist_user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

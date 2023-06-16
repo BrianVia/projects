@@ -150,7 +150,7 @@ class WishlistRepository {
       monitored: boolean;
       referral_link: string | null;
       update_frequency: string | null;
-      wishlistId: string;
+      wishlist_id: string;
       discount_percentage: number | null;
       item_id: string | null;
       price: number;
