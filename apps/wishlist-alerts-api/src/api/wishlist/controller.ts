@@ -118,6 +118,46 @@ class WishlistController {
     });
   }
 
+  async handleGetWishlistItems(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    logger.info(
+      `received request: GET /api/v1/wishlist/${req.params.id}/items`
+    );
+
+    // const token = req.headers.authorization;
+    // const tokenUser = await authService.getTokenUser(token);
+    // if (tokenUser) {
+    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    // } else {
+    //   logger.warn(`token user not found`);
+    //   res.status(401).send('Unauthorized');
+    // }
+
+    const wishlistId = req.params.id;
+
+    const wishlistBelongsToUser = await wishlistService.withlistBelongsToUser(
+      wishlistId,
+      process.env.WISHLIST_ALERTS_MY_USER_UUID //replace with token user id
+    );
+
+    if (!wishlistBelongsToUser) {
+      res.status(401).send('Unauthorized');
+    }
+
+    const [wishlistItems, wishlistItemsError] =
+      await wishlistService.getItemsByWishlistId(wishlistId);
+
+    if (wishlistItemsError) {
+      logger.error(wishlistItemsError);
+      res.status(500).json({ error: wishlistItemsError });
+    }
+
+    res.status(200).json({ wishlistItems });
+  }
+
   async handleWishlistUpdate(req: Request, res: Response, next: NextFunction) {
     logger.info(`received request: PUT /api/v1/wishlist/:id`);
   }

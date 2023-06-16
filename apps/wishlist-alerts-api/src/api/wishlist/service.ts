@@ -94,6 +94,8 @@ class WishlistService {
         .find('a.a-link-normal')
         .attr('href')}` as string;
 
+      const itemImageUrl = $(item).find('img').attr('src') as string;
+
       const itemCurrentPriceWhole = $(item)
         .find('span.a-price-whole')
         .text()
@@ -114,6 +116,7 @@ class WishlistService {
         itemTitle,
         itemMaker,
         itemHref,
+        itemImageUrl,
         itemCurrentPrice: parseFloat(itemCurrentPrice),
       });
     });
@@ -202,7 +205,7 @@ class WishlistService {
   }> {
     const { data, error } = await supabaseClient
       .from('wishlist_items')
-      .insert(wishlistItems)
+      .upsert(wishlistItems)
       .select();
 
     return Promise.resolve({ data, error });
@@ -245,10 +248,9 @@ class WishlistService {
   ): Promise<
     [Database['public']['Tables']['wishlist_items']['Row'][], PostgrestError]
   > {
-    const { data, error } = await supabaseClient
-      .from('wishlist_items')
-      .select('*')
-      .eq('wishlistId', wishlistId);
+    const [data, error] = await wishlistItemsRepository.getItemsByWishlistId(
+      wishlistId
+    );
 
     return Promise.resolve([data, error]);
   }
