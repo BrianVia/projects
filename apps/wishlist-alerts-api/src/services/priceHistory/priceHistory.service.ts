@@ -19,7 +19,7 @@ class PriceHistoryService {
       {
         item_id: itemId,
         price: itemPrice,
-        discount_percentage: discountPercentage,
+        discount_percentage: discountPercentage ?? 0,
       },
     ]);
     return Promise.resolve({ data, error });

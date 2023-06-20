@@ -33,6 +33,12 @@ const wishlistItemService = new WishlistItemService();
 const authService = new AuthService();
 const priceHistoryService = new PriceHistoryService();
 
+export interface InsertPriceHistoryRecordPartialPayload {
+  itemId: string;
+  itemPrice: number;
+  discountPercentage?: number;
+}
+
 class WishlistController {
   async handlePostNewWishlist(req: Request, res: Response) {
     logger.info(`received request: POST /api/v1/wishlist/new`);
@@ -86,12 +92,42 @@ class WishlistController {
             insertWishlistItems,
             insertWishlistData.id
           );
+        console.log(insertItemsData);
+        if (insertItemsError) {
+          console.error(insertItemsError);
+          throw insertItemsError;
+        }
 
         console.log(insertItemsData);
-        if (insertItemsError) console.error(insertItemsError);
+
+        const priceHistoryRecords: InsertPriceHistoryRecordPartialPayload[] =
+          [];
+        for (const item of insertItemsData) {
+          priceHistoryRecords.push({
+            itemId: item.id,
+            itemPrice: item.marketplace_item_original_price,
+            discountPercentage: 0,
+          });
+        }
+
+        const {
+          data: insertItemPriceHistoryRecordsData,
+          error: insertItemPriceHistoryRecordsError,
+        } = await priceHistoryService.insertItemPriceHistoryRecords(
+          priceHistoryRecords
+        );
+
+        if (insertItemPriceHistoryRecordsError) {
+          console.error(insertItemPriceHistoryRecordsError);
+          throw insertItemPriceHistoryRecordsError;
+        }
+        logger.info(
+          `inserted ${insertItemPriceHistoryRecordsData.length} items into the price_history table.`
+        );
 
         res.status(201).json({
           ...insertWishlistData,
+          size: wishlistData.wishlishItems.items.length,
           wishlist_items: insertItemsData,
         });
       }
