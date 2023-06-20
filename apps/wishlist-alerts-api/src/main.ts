@@ -8,7 +8,7 @@ import cors from 'cors';
 
 import 'dotenv/config';
 
-import { Logger } from '@common/logger';
+import winston from 'winston';
 import { wishlistRouter } from './api/wishlist/router';
 import { MonitoringService } from './services/monitoring';
 import { cronjobs } from './api/cronjobs/cronjobs';
@@ -21,7 +21,11 @@ const monitoringService = new MonitoringService();
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
-const logger = new Logger();
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
 
 app.use('/api/v1/wishlist', wishlistRouter);
 

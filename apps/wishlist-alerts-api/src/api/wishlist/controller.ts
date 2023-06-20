@@ -1,19 +1,22 @@
-import { Logger } from '@common/logger';
 import { WishlistService } from './service';
 import { PriceHistoryService } from '../../services/priceHistory';
 
 import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
 import { NextFunction, Request, Response } from 'express';
-import { val } from 'cheerio/lib/api/attributes';
+import winston from 'winston';
 
-const logger = new Logger();
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
 const wishlistService = new WishlistService();
 const authService = new AuthService();
 const priceHistoryService = new PriceHistoryService();
 
 class WishlistController {
-  async handlePostNewWishlist(req: Request, res: Response, next: NextFunction) {
+  async handlePostNewWishlist(req: Request, res: Response) {
     logger.info(`received request: POST /api/v1/wishlist/new`);
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
@@ -34,6 +37,7 @@ class WishlistController {
     logger.debug(`wishlistUrl: ${wishlistUrl}`);
     const wishlistData = await wishlistService.parseWishlist(wishlistUrl);
 
+    // Find if wishlsit already exists
     const { data: existingWishlistData, error: fetchWishlistError } =
       await wishlistService.fetchWishlistByUrl(wishlistUrl);
 
@@ -52,6 +56,7 @@ class WishlistController {
           wishlistData.wishlistTitle
         );
 
+      //prepare DB records to insert
       const insertWishlistItems = wishlistService.generateWishlistItemEntities(
         wishlistData.wishlishItems.items,
         insertWishlistData.id
@@ -65,7 +70,7 @@ class WishlistController {
           );
 
         console.log(insertItemsData);
-        console.error(insertItemsError);
+        if (insertItemsError) console.error(insertItemsError);
       }
 
       res.status(201).json({
@@ -109,7 +114,7 @@ class WishlistController {
         wishlistId
       );
 
-    logger.log(insertItemsData);
+    logger.info(insertItemsData);
     logger.error(insertItemsError);
 
     res.status(201).json({

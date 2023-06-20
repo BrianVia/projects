@@ -1,7 +1,11 @@
-import { Logger } from '@common/logger';
+import winston from 'winston';
 import { supabase } from '../supabase';
 
-const logger = new Logger();
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
 
 class AuthService {
   public async getTokenUser(token: string) {
