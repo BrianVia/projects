@@ -274,7 +274,7 @@ class WishlistService {
     }
   }
 
-  public async analyzeWishlist(
+  public async analyzeWishlistItems(
     wishlistId: string,
     addNewItemsFound = false
   ): Promise<{
