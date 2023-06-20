@@ -166,7 +166,7 @@ class WishlistRepository {
           GROUP BY item_id
         ) latest_ph ON wi.id = latest_ph.item_id
         JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
-        WHERE wi."wishlistId" = '${wishlistId}';
+        WHERE wi.wishlist_id = '${wishlistId}';
       `;
 
       console.log(`query: ${wishlistQuery}`);
