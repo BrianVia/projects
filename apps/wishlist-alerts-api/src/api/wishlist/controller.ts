@@ -10,7 +10,12 @@ const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.json(),
   defaultMeta: { service: 'wishlist-alerts-api' },
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
 });
+
 const wishlistService = new WishlistService();
 const authService = new AuthService();
 const priceHistoryService = new PriceHistoryService();
