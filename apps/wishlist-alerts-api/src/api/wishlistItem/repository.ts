@@ -50,7 +50,7 @@ class WishlistItemRepository {
     const { data, error } = await this.supabaseClient
       .from('wishlist_items')
       .select('*')
-      .eq('wishlistId', wishlistId);
+      .eq('wishlist_id', wishlistId);
 
     return Promise.resolve([data, error]);
   }
