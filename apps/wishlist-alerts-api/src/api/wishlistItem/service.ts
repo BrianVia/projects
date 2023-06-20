@@ -14,7 +14,7 @@ export interface ParsedWishlistItem {
   itemImageUrl?: string;
 }
 
-class WishlistItemService {
+export class WishlistItemService {
   public async addNewWishlistItem(
     item: ParsedWishlistItem,
     wishlistId: string
@@ -31,7 +31,9 @@ class WishlistItemService {
   public async addNewWishlistItems(
     items: ParsedWishlistItem[],
     wishlistId: string
-  ) {
+  ): Promise<
+    [Database['public']['Tables']['wishlist_items']['Insert'][], PostgrestError]
+  > {
     const insertItems = items.map((item) =>
       this.mapParsedWishlistItemToDatabaseItem(item, wishlistId)
     );

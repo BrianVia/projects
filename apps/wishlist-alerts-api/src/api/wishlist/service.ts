@@ -6,6 +6,7 @@ import { Database } from '../../types/supabase';
 import { PriceHistoryService } from '../../services/priceHistory';
 import { WishlistRepository } from './repository';
 import { WishlistItemRepository } from '../wishlistItem/repository';
+import { WishlistItemService } from '../wishlistItem';
 
 export interface ParsedWishlistItem {
   itemId: string;
@@ -24,6 +25,7 @@ const supabaseClient = createClient<Database>(
 const priceHistoryService = new PriceHistoryService();
 const wishlistRepository = new WishlistRepository();
 const wishlistItemsRepository = new WishlistItemRepository();
+const wishlistItemsService = new WishlistItemService();
 
 class WishlistService {
   public async parseWishlist(wishlistUrl: string): Promise<{
@@ -375,15 +377,21 @@ class WishlistService {
       });
 
     if (addNewItemsFound) {
-      const newItemsToUpsert = this.generateWishlistItemEntities(
-        itemsNotInDB,
-        wishlistId
+      //insert new Items into DB ("wishlist_items" table)
+      const [newItemsInserted, newItemsInsertedError] =
+        await wishlistItemsService.addNewWishlistItems(
+          itemsNotInDB,
+          wishlistId
+        );
+      console.log(
+        `inserted ${newItemsInserted.length} new items to 'wihlist_items' table.`
       );
+      if (newItemsInsertedError) {
+        console.error(newItemsInsertedError);
+        throw newItemsInsertedError;
+      }
 
-      const { data: insertNewItems, error: insertItemsError } =
-        await this.upsertWishlistItems(newItemsToUpsert, wishlistId);
       const newItemPriceHistoryRecords = itemsNotInDB.map((item) => {
-        // console.log(item);
         return {
           itemId: wishlistEntities.get(item.itemHref).id,
           itemPrice: item.itemCurrentPrice,
@@ -402,6 +410,14 @@ class WishlistService {
         error: priceHistoryInsertError,
       } = await priceHistoryService.insertItemPriceHistoryRecords(
         newItemPriceHistoryRecords
+      );
+
+      if (priceHistoryInsertError) {
+        console.error(priceHistoryInsertError);
+        throw priceHistoryInsertError;
+      }
+      console.log(
+        `Inserted ${newItemPriceHistoryInsertData.length} price history records.`
       );
     }
 

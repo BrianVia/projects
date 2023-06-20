@@ -1,6 +1,6 @@
 import { WishlistService } from './service';
 import { PriceHistoryService } from '../../services/priceHistory';
-
+import { WishlistItemService } from '../wishlistItem/service';
 import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
 import { NextFunction, Request, Response } from 'express';
@@ -29,6 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const wishlistService = new WishlistService();
+const wishlistItemService = new WishlistItemService();
 const authService = new AuthService();
 const priceHistoryService = new PriceHistoryService();
 
@@ -73,13 +74,13 @@ class WishlistController {
           wishlistData.wishlistTitle
         );
 
-      //prepare DB records to insert
-      const insertWishlistItems = wishlistService.generateWishlistItemEntities(
-        wishlistData.wishlishItems.items,
-        insertWishlistData.id
-      );
-
       if (addAllItems) {
+        //prepare DB records to insert
+        const insertWishlistItems =
+          wishlistService.generateWishlistItemEntities(
+            wishlistData.wishlishItems.items,
+            insertWishlistData.id
+          );
         const { data: insertItemsData, error: insertItemsError } =
           await wishlistService.upsertWishlistItems(
             insertWishlistItems,
@@ -88,11 +89,17 @@ class WishlistController {
 
         console.log(insertItemsData);
         if (insertItemsError) console.error(insertItemsError);
+
+        res.status(201).json({
+          ...insertWishlistData,
+          wishlist_items: insertItemsData,
+        });
       }
 
       res.status(201).json({
         ...insertWishlistData,
-        wishlist_items: wishlistData.wishlishItems,
+        size: wishlistData.wishlishItems.items.length,
+        wishlist_items: wishlistData.wishlishItems.items,
       });
     }
   }
@@ -205,9 +212,6 @@ class WishlistController {
       wishlistId,
       addNewItemsFound
     );
-
-    if (addNewItemsFound) {
-    }
 
     res.status(200).json({
       itemsWithPriceCutsBelowThreshold,
