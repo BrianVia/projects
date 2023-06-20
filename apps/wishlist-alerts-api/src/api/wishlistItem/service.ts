@@ -14,11 +14,6 @@ export interface ParsedWishlistItem {
   itemImageUrl?: string;
 }
 
-const supabaseClient = createClient<Database>(
-  process.env.WISHLIST_ALERTS_SUPABASE_URL,
-  process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
-);
-
 class WishlistItemService {
   public async addNewWishlistItem(
     item: ParsedWishlistItem,
