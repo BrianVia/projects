@@ -179,7 +179,10 @@ class WishlistController {
       itemsWithPriceCutsBelowThreshold,
       discountThreshold,
       newItemsFound,
-    } = await wishlistService.analyzeWishlist(wishlistId, addNewItemsFound);
+    } = await wishlistService.analyzeWishlistItems(
+      wishlistId,
+      addNewItemsFound
+    );
 
     res.status(200).json({
       itemsWithPriceCutsBelowThreshold,

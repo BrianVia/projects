@@ -26,7 +26,7 @@ class MonitoringService {
         itemsWithPriceCutsBelowThreshold,
         discountThreshold,
         newItemsFound,
-      } = await wishlistService.analyzeWishlist(wishlist.id, true);
+      } = await wishlistService.analyzeWishlistItems(wishlist.id, true);
       console.log(
         `Time: ${new Date().toLocaleString()} -analyzing wishlist ${
           wishlist.id
