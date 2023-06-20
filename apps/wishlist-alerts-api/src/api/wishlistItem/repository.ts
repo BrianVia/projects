@@ -29,6 +29,19 @@ class WishlistItemRepository {
     return Promise.resolve([data, error]);
   }
 
+  public async insertNewWishlistItem(
+    wishlistItem: Database['public']['Tables']['wishlist_items']['Insert']
+  ): Promise<
+    [Database['public']['Tables']['wishlist_items']['Insert'], PostgrestError]
+  > {
+    const { data, error } = await this.supabaseClient
+      .from('wishlist_items')
+      .insert(wishlistItem)
+      .select()
+      .single();
+    return Promise.resolve([data, error]);
+  }
+
   public async getWishlistItemsByWishlistId(
     wishlistId: string
   ): Promise<

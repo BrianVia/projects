@@ -5,6 +5,7 @@ import { Database } from '../../types/supabase';
 import { AuthService } from '../../lib/auth';
 import { NextFunction, Request, Response } from 'express';
 import winston from 'winston';
+import { WishlistItemRepository } from '../wishlistItem/repository';
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -15,6 +16,17 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'combined.log' }),
   ],
 });
+//
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
+}
 
 const wishlistService = new WishlistService();
 const authService = new AuthService();
@@ -193,6 +205,9 @@ class WishlistController {
       wishlistId,
       addNewItemsFound
     );
+
+    if (addNewItemsFound) {
+    }
 
     res.status(200).json({
       itemsWithPriceCutsBelowThreshold,

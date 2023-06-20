@@ -432,7 +432,7 @@ class WishlistService {
   public async getAllUserWishlists(
     userId: string,
     withItems = true,
-    withDiscounts = true
+    withDiscounts = false
   ): Promise<[any, PostgrestError?]> {
     if (withDiscounts) {
       const [userWishlists, userWishlistsError] =
