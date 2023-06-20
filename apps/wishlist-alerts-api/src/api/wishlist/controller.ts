@@ -212,31 +212,38 @@ class WishlistController {
       wishlistItemsMap.set(item.id, item);
     });
 
-    const itemsWithLatestPrices = await wishlistItems.map(async (item) => {
-      const [itemLatestPrice, itemsLatestPriceError] =
-        await priceHistoryService.getItemLatestPrice(item.id);
-      if (itemsLatestPriceError) {
-        console.error(itemsLatestPriceError);
-        return {
-          ...item,
-          latestPrice: item.marketplace_item_original_price ?? null,
-          discountPercentage: 0,
-        };
-      } else {
-        return {
-          ...item,
-          latestPrice: itemLatestPrice.price,
-          discountPercentage: itemLatestPrice.discount_percentage,
-        };
-      }
-    });
+    const itemsWithLatestPrices = wishlistItems
+      .filter(
+        (item) =>
+          item.marketplace_item_original_price !== null &&
+          item.marketplace_item_original_price !== undefined &&
+          !Number.isNaN(item.marketplace_item_original_price)
+      )
+      .map(async (item) => {
+        const [itemLatestPrice, itemsLatestPriceError] =
+          await priceHistoryService.getItemLatestPrice(item.id);
+        if (itemsLatestPriceError) {
+          console.error(itemsLatestPriceError);
+          return {
+            ...item,
+            latest_price: item.marketplace_item_original_price ?? null,
+            discount_percentage: 0,
+          };
+        } else {
+          return {
+            ...item,
+            latest_price: itemLatestPrice.price,
+            discount_percentage: itemLatestPrice.discount_percentage,
+          };
+        }
+      });
 
     const finalItems = await Promise.all(itemsWithLatestPrices);
 
-    const finalDiscountedItems = finalItems.filter(
-      (item) => item.discountPercentage > 20
-    );
-    res.status(200).json({ items: finalDiscountedItems });
+    const finalDiscountedItems = finalItems
+      .filter((item) => item.discount_percentage > 20)
+      .sort((a, b) => b.discount_percentage - a.discount_percentage);
+    res.status(200).json({ discountedItems: finalDiscountedItems });
   }
 
   async handleAnalyzeAllWishlists(
