@@ -27,28 +27,15 @@ export class cronjobs {
     logger.info('Scheduling cron jobs...');
 
     logger.info('Monitoring Wishlists Daily at Midnight EST');
-    cron.schedule(
-      `15 8 * * *`,
-      async () => {
-        await monitoringService.monitorWishlists('daily');
-      },
-      {
-        scheduled: true,
-        timezone: 'America/New_York',
+    cron.schedule(`0 0 * * *`, async () => {
+      const ranDaily = await monitoringService.monitorWishlists('daily');
+      if (ranDaily) {
+        logger.info('Daily cron job ran at ' + new Date().toLocaleString());
       }
-    );
+    });
 
-    cron.schedule(
-      '0 * * * *',
-      () => {
-        logger.info(
-          `Hourly cron job running at ${new Date().toLocaleString()}`
-        );
-      },
-      {
-        scheduled: true,
-        timezone: 'America/New_York',
-      }
-    );
+    cron.schedule('0 * * * *', () => {
+      logger.info(`Hourly cron job running at ${new Date().toLocaleString()}`);
+    });
   }
 }
