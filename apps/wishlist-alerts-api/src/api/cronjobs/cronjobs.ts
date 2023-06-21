@@ -28,9 +28,9 @@ export class cronjobs {
 
     logger.info('Monitoring Wishlists Daily at Midnight EST');
     cron.schedule(
-      `0 0 * * *`,
-      () => {
-        monitoringService.monitorWishlists('daily');
+      `15 8 * * *`,
+      async () => {
+        await monitoringService.monitorWishlists('daily');
       },
       {
         scheduled: true,
