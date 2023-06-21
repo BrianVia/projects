@@ -8,6 +8,24 @@ import { WishlistRepository } from './repository';
 import { WishlistItemRepository } from '../wishlistItem/repository';
 import { WishlistItemService } from '../wishlistItem';
 
+import winston from 'winston';
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
+//
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
+}
+
 export interface ParsedWishlistItem {
   itemId: string;
   itemTitle: string;
@@ -74,7 +92,7 @@ class WishlistService {
     const listContainer = $('ul#g-items');
 
     const items = listContainer.find('li.g-item-sortable');
-    console.log(`Found ${items.length} items in wishlist HTML`);
+    logger.info(`Found ${items.length} items in wishlist HTML`);
 
     const results: ParsedWishlistItem[] = [];
 
@@ -82,8 +100,8 @@ class WishlistService {
       const itemId: string = $(item).data('itemid') as string;
       const itemTitle = $(item).find('a.a-link-normal').attr('title') as string;
 
-      // console.log(`item title: ${itemTitle}`);
-      // console.log(item);
+      // logger.info(`item title: ${itemTitle}`);
+      // logger.info(item);
       //find item by ID and get the maker;
 
       const itemMaker: string = $(item)
@@ -110,8 +128,8 @@ class WishlistService {
 
       const itemCurrentPrice = `${itemCurrentPriceWhole}${itemCurrentPriceFractional}`;
 
-      // console.log(itemCurrentPrice);
-      // console.log(parseFloat(itemCurrentPrice));
+      // logger.info(itemCurrentPrice);
+      // logger.info(parseFloat(itemCurrentPrice));
 
       results.push({
         itemId,
@@ -123,7 +141,7 @@ class WishlistService {
       });
     });
 
-    console.log(`Retrieved ${results.length} items for ${wishlistUrl}`);
+    logger.info(`Retrieved ${results.length} items for ${wishlistUrl}`);
     const responseData = {
       wishlistUrl: wishlistUrl,
       wishlistTitle: wishlistTitle,
@@ -297,15 +315,15 @@ class WishlistService {
       wishlistId
     );
 
-    if (wishlistError) console.error(wishlistError);
+    if (wishlistError) logger.error(wishlistError);
 
-    // console.log(wishlistData);
+    // logger.info(wishlistData);
 
     const [wishlistItemEntitesList, wishlistItemEntitiesListError] =
       await wishlistItemsRepository.getItemsByWishlistId(wishlistId);
 
     if (wishlistItemEntitiesListError)
-      console.error(wishlistItemEntitiesListError);
+      logger.error(wishlistItemEntitiesListError);
 
     const wishlistEntities = new Map<
       string,
@@ -318,7 +336,7 @@ class WishlistService {
         wishlistEntities.set(item.marketplace_item_href, item);
       });
 
-    console.log(`items in DB: ${wishlistEntities.size}`);
+    logger.info(`items in DB: ${wishlistEntities.size}`);
 
     const currentWishlistItems = await this.parseWishlist(
       wishlistData.wishlist_url
@@ -333,7 +351,7 @@ class WishlistService {
       );
 
     const itemsNotInDB = [];
-    const priceHistoryRecords = itemsWithValidPrices
+    const currentItemPriceHistoryRecords = itemsWithValidPrices
       .filter((item) => {
         if (!wishlistEntities.has(item.itemHref)) {
           itemsNotInDB.push(item);
@@ -343,7 +361,7 @@ class WishlistService {
         }
       })
       .map((item) => {
-        // console.log(item);
+        // logger.info(item);
         return {
           itemId: wishlistEntities.get(item.itemHref).id,
           itemPrice: item.itemCurrentPrice,
@@ -359,10 +377,16 @@ class WishlistService {
 
     const { data: priceHistoryInsertData, error: priceHistoryInsertError } =
       await priceHistoryService.insertItemPriceHistoryRecords(
-        priceHistoryRecords
+        currentItemPriceHistoryRecords
       );
+    logger.info(
+      `Inserted ${priceHistoryInsertData.length} price history records.`
+    );
 
-    if (priceHistoryInsertError) console.error(priceHistoryInsertError);
+    if (priceHistoryInsertError) {
+      logger.error(priceHistoryInsertError);
+      throw priceHistoryInsertError;
+    }
 
     const itemsWithPriceCuts = currentWishlistItems.wishlishItems.items
       .filter((item) => item.itemCurrentPrice !== undefined)
@@ -383,25 +407,19 @@ class WishlistService {
           itemsNotInDB,
           wishlistId
         );
-      console.log(
+      logger.info(
         `inserted ${newItemsInserted.length} new items to 'wihlist_items' table.`
       );
       if (newItemsInsertedError) {
-        console.error(newItemsInsertedError);
+        logger.error(newItemsInsertedError);
         throw newItemsInsertedError;
       }
 
-      const newItemPriceHistoryRecords = itemsNotInDB.map((item) => {
+      const newItemPriceHistoryRecords = newItemsInserted.map((item) => {
         return {
-          itemId: wishlistEntities.get(item.itemHref).id,
-          itemPrice: item.itemCurrentPrice,
-          discountPercentage:
-            ((wishlistEntities.get(item.itemHref)
-              .marketplace_item_original_price -
-              item.itemCurrentPrice) /
-              wishlistEntities.get(item.itemHref)
-                .marketplace_item_original_price) *
-            100,
+          itemId: item.id,
+          itemPrice: item.marketplace_item_original_price,
+          discountPercentage: 0,
         };
       });
 
@@ -413,10 +431,10 @@ class WishlistService {
       );
 
       if (priceHistoryInsertError) {
-        console.error(priceHistoryInsertError);
+        logger.error(priceHistoryInsertError);
         throw priceHistoryInsertError;
       }
-      console.log(
+      logger.info(
         `Inserted ${newItemPriceHistoryInsertData.length} price history records.`
       );
     }
@@ -455,7 +473,7 @@ class WishlistService {
         await wishlistRepository.getAllUserWishlists(userId);
 
       if (userWishlistsError) {
-        console.error(userWishlistsError);
+        logger.error(userWishlistsError);
         Promise.reject(userWishlistsError);
       }
 
@@ -473,7 +491,7 @@ class WishlistService {
         await wishlistRepository.getAllUserWishlistsWithItems(userId);
 
       if (userWishlistsWithItemsError) {
-        console.error(userWishlistsWithItemsError);
+        logger.error(userWishlistsWithItemsError);
         Promise.reject(userWishlistsWithItemsError);
       }
 
@@ -486,7 +504,7 @@ class WishlistService {
         await wishlistRepository.getAllUserWishlists(userId);
 
       if (userWishlistsError) {
-        console.error(userWishlistsError);
+        logger.error(userWishlistsError);
         Promise.reject(userWishlistsError);
       }
       return Promise.resolve([userWishlists, userWishlistsError]);

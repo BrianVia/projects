@@ -7,6 +7,24 @@ import { Database } from '../../types/supabase';
 
 import { Pool } from 'pg';
 
+import winston from 'winston';
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
+//
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
+}
+
 class WishlistRepository {
   private supabaseClient: SupabaseClient<Database>;
   private pool: Pool;
@@ -169,15 +187,15 @@ class WishlistRepository {
         WHERE wi.wishlist_id = '${wishlistId}';
       `;
 
-      console.log(`query: ${wishlistQuery}`);
+      logger.info(`query: ${wishlistQuery}`);
 
       const client = await this.pool.connect();
       const res = await client.query(wishlistQuery);
-      console.log(`Found ${res.rows.length} records`);
+      logger.info(`Found ${res.rows.length} records`);
       client.release(); // Release the connection back to the pool
       return Promise.resolve(res.rows);
     } catch (error) {
-      console.error('Error executing query:', error);
+      logger.error('Error executing query:', error);
       return [];
     }
   }

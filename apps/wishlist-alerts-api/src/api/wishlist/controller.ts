@@ -92,13 +92,13 @@ class WishlistController {
             insertWishlistItems,
             insertWishlistData.id
           );
-        console.log(insertItemsData);
+        logger.info(insertItemsData);
         if (insertItemsError) {
-          console.error(insertItemsError);
+          logger.error(insertItemsError);
           throw insertItemsError;
         }
 
-        console.log(insertItemsData);
+        logger.info(insertItemsData);
 
         const priceHistoryRecords: InsertPriceHistoryRecordPartialPayload[] =
           [];
@@ -118,7 +118,7 @@ class WishlistController {
         );
 
         if (insertItemPriceHistoryRecordsError) {
-          console.error(insertItemPriceHistoryRecordsError);
+          logger.error(insertItemPriceHistoryRecordsError);
           throw insertItemPriceHistoryRecordsError;
         }
         logger.info(
@@ -130,13 +130,13 @@ class WishlistController {
           size: wishlistData.wishlishItems.items.length,
           wishlist_items: insertItemsData,
         });
+      } else {
+        res.status(201).json({
+          ...insertWishlistData,
+          size: wishlistData.wishlishItems.items.length,
+          wishlist_items: wishlistData.wishlishItems.items,
+        });
       }
-
-      res.status(201).json({
-        ...insertWishlistData,
-        size: wishlistData.wishlishItems.items.length,
-        wishlist_items: wishlistData.wishlishItems.items,
-      });
     }
   }
 
@@ -270,7 +270,7 @@ class WishlistController {
     const [wishlistItems, wishlistItemsError] =
       await wishlistService.getItemsByWishlistId(wishlistId);
 
-    // console.log(wishlistItems);
+    // logger.info(wishlistItems);
 
     const wishlistItemsMap = new Map<
       string,
@@ -291,7 +291,7 @@ class WishlistController {
         const [itemLatestPrice, itemsLatestPriceError] =
           await priceHistoryService.getItemLatestPrice(item.id);
         if (itemsLatestPriceError) {
-          console.error(itemsLatestPriceError);
+          logger.error(itemsLatestPriceError);
           return {
             ...item,
             latest_price: item.marketplace_item_original_price ?? null,
@@ -319,7 +319,7 @@ class WishlistController {
     res: Response,
     next: NextFunction
   ) {
-    console.log('test');
+    logger.info('test');
   }
 
   async handleGetAllUserWishlists(

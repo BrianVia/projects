@@ -6,6 +6,24 @@ const supabaseClient = createClient<Database>(
   process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
 );
 
+import winston from 'winston';
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'wishlist-alerts-api' },
+});
+//
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
+}
+
 class PriceHistoryService {
   public async insertItemPriceHistoryRecord(
     itemId: string,
@@ -35,7 +53,7 @@ class PriceHistoryService {
     data: Database['public']['Tables']['price_history']['Insert'][];
     error: PostgrestError;
   }> {
-    // console.log('inserting items into price history table');
+    // logger.info('inserting items into price history table');
 
     const insertRecordsPayload = items
       .filter(
@@ -45,7 +63,7 @@ class PriceHistoryService {
           !Number.isNaN(item.itemPrice)
       )
       .map((item) => {
-        // console.log(item);
+        // logger.info(item);
         return {
           item_id: item.itemId,
           price: item.itemPrice,
@@ -53,7 +71,7 @@ class PriceHistoryService {
         };
       });
 
-    // console.log(insertRecordsPayload.filter((item) => item.price === null));
+    // logger.info(insertRecordsPayload.filter((item) => item.price === null));
 
     const { data, error } = await supabaseClient
       .from('price_history')
@@ -62,7 +80,7 @@ class PriceHistoryService {
 
     // console.debug(data);
     // console.debug(error);
-    if (error) console.error(error.toString());
+    if (error) logger.error(error.toString());
     return Promise.resolve({ data, error });
   }
 
@@ -79,7 +97,7 @@ class PriceHistoryService {
       .limit(1)
       .single();
 
-    if (error) console.log(itemId, data, error);
+    if (error) logger.info(itemId, data, error);
 
     return Promise.resolve([data, error]);
   }
@@ -94,8 +112,8 @@ class PriceHistoryService {
       .select('*')
       .in('item_id', itemIds)
       .order('created_at', { ascending: false });
-    console.log(data);
-    console.log(error);
+    logger.info(data);
+    logger.info(error);
 
     return Promise.resolve([data, error]);
   }
