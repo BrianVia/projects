@@ -26,15 +26,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 class WishlistRepository {
-  private supabaseClient: SupabaseClient<Database>;
   private pool: Pool;
 
   constructor() {
-    this.supabaseClient = createClient<Database>(
-      process.env.WISHLIST_ALERTS_SUPABASE_URL,
-      process.env.WISHLIST_ALERTS_SUPABASE_SUPER_TOKEN
-    );
-
     this.pool = new Pool({
       user: 'postgres',
       password: process.env.WISHLIST_ALERTS_DB_PASSWORD,
@@ -49,10 +43,13 @@ class WishlistRepository {
   public async getAllWishlists(): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
-    const { data, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*');
-    return Promise.resolve([data, error]);
+    try {
+      const query = 'SELECT * FROM wishlists';
+      const res = await this.pool.query(query);
+      return Promise.resolve([res.rows, null]);
+    } catch (error) {
+      return Promise.reject([null, error]);
+    }
   }
 
   public async fetchWishlistByUrl(
@@ -60,14 +57,13 @@ class WishlistRepository {
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'], PostgrestError]
   > {
-    const { data, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*', { count: 'exact' })
-      .eq('wishlist_url', wishlistUrl)
-      .limit(1)
-      .single();
-
-    return Promise.resolve([data, error]);
+    try {
+      const query = `SELECT * FROM wishlists WHERE wishlist_url = $1 LIMIT 1`;
+      const res = await this.pool.query(query, [wishlistUrl]);
+      return Promise.resolve([res.rows[0], null]);
+    } catch (error) {
+      return Promise.resolve([null, error]);
+    }
   }
 
   public async fetchWishlistById(
@@ -78,14 +74,13 @@ class WishlistRepository {
       error: PostgrestError
     ]
   > {
-    const { data, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*')
-      .eq('id', wishlistId)
-      .limit(1)
-      .single();
-
-    return Promise.resolve([data, error]);
+    try {
+      const query = `SELECT * FROM wishlists WHERE id = $1 LIMIT 1`;
+      const res = await this.pool.query(query, [wishlistId]);
+      return Promise.resolve([res.rows[0], null]);
+    } catch (error) {
+      return Promise.resolve([null, error]);
+    }
   }
 
   public async insertNewWishlist(
@@ -98,21 +93,25 @@ class WishlistRepository {
   ): Promise<
     [Database['public']['Tables']['wishlists']['Insert'], PostgrestError]
   > {
-    const { data, error } = await this.supabaseClient
-      .from('wishlists')
-      .insert({
-        wishlist_url: wishlistUrl,
-        wishlist_user_id: wishlistUserId,
-        monitored: monitored,
-        initialized: initialized,
-        update_frequency: updateFrequency,
-        name: wishlistName,
-      })
-      .select()
-      .limit(1)
-      .single();
-
-    return Promise.resolve([data, error]);
+    try {
+      const query = `
+        INSERT INTO wishlists (wishlist_url, wishlist_user_id, monitored, initialized, update_frequency, name)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *;
+      `;
+      const values = [
+        wishlistUrl,
+        wishlistUserId,
+        monitored,
+        initialized,
+        updateFrequency,
+        wishlistName,
+      ];
+      const res = await this.pool.query(query, values);
+      return Promise.resolve([res.rows[0], null]);
+    } catch (error) {
+      return Promise.resolve([null, error]);
+    }
   }
 
   public async getAllUserWishlists(
@@ -120,12 +119,13 @@ class WishlistRepository {
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
-    const { data: userWishlists, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*')
-      .eq('wishlist_user_id', userId);
-
-    return Promise.resolve([userWishlists, error]);
+    try {
+      const query = `SELECT * FROM wishlists WHERE wishlist_user_id = $1`;
+      const res = await this.pool.query(query, [userId]);
+      return Promise.resolve([res.rows, null]);
+    } catch (error) {
+      return Promise.resolve([null, error]);
+    }
   }
 
   public async getAllUserWishlistsWithItems(
@@ -133,25 +133,43 @@ class WishlistRepository {
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
-    const { data: userWishlists, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*, wishlist_items (*)')
-      .eq('wishlist_user_id', userId);
-
-    return Promise.resolve([userWishlists, error]);
+    try {
+      const query = `
+        SELECT w.*, wi.*
+        FROM wishlists w
+        JOIN wishlist_items wi ON w.id = wi.wishlist_id
+        WHERE w.wishlist_user_id = $1
+      `;
+      const res = await this.pool.query(query, [userId]);
+      return Promise.resolve([res.rows, null]);
+    } catch (error) {
+      return Promise.reject([null, error]);
+    }
   }
 
   public async getAllUserWishlistsWithItemsAndRecords(
     userId: string
   ): Promise<
-    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+    Database['public']['Tables']['wishlists']['Row'][] | PostgrestError
   > {
-    const { data: userWishlists, error } = await this.supabaseClient
-      .from('wishlists')
-      .select('*, wishlist_items (*, price_history(*))')
-      .eq('wishlist_user_id', userId);
-
-    return Promise.resolve([userWishlists, error]);
+    try {
+      const query = `
+        SELECT w.*, wi.*, ph.*
+        FROM wishlists w
+        JOIN wishlist_items wi ON w.id = wi.wishlist_id
+        JOIN (
+          SELECT item_id, MAX(created_at) AS latest_created_at
+          FROM price_history
+          GROUP BY item_id
+        ) latest_ph ON wi.id = latest_ph.item_id
+        JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
+        WHERE w.wishlist_user_id = $1
+      `;
+      const res = await this.pool.query(query, [userId]);
+      return Promise.resolve(res.rows);
+    } catch (error) {
+      return Promise.resolve(error);
+    }
   }
 
   public async getWishlistItemsAndDiscounts(wishlistId: string): Promise<
@@ -175,7 +193,7 @@ class WishlistRepository {
     }[]
   > {
     try {
-      const wishlistQuery = `
+      const query = `
         SELECT wi.*, ph.*
         FROM wishlist_items wi
         JOIN (
@@ -184,19 +202,13 @@ class WishlistRepository {
           GROUP BY item_id
         ) latest_ph ON wi.id = latest_ph.item_id
         JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
-        WHERE wi.wishlist_id = '${wishlistId}';
+        WHERE wi.wishlist_id = $1
       `;
-
-      logger.info(`query: ${wishlistQuery}`);
-
-      const client = await this.pool.connect();
-      const res = await client.query(wishlistQuery);
-      logger.info(`Found ${res.rows.length} records`);
-      client.release(); // Release the connection back to the pool
+      const res = await this.pool.query(query, [wishlistId]);
       return Promise.resolve(res.rows);
     } catch (error) {
       logger.error('Error executing query:', error);
-      return [];
+      return Promise.reject(error);
     }
   }
 }
