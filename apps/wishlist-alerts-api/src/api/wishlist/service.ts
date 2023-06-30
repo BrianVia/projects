@@ -472,6 +472,9 @@ class WishlistService {
       const [userWishlists, userWishlistsError] =
         await wishlistRepository.getAllUserWishlists(userId);
 
+      logger.info(`got user wishlists:`);
+      logger.info(userWishlists.map((wishlist) => wishlist.name).join(', '));
+
       if (userWishlistsError) {
         logger.error(userWishlistsError);
         Promise.reject(userWishlistsError);
@@ -487,8 +490,11 @@ class WishlistService {
 
       return Promise.resolve([userWishlistsWithItemsAndDiscounts]);
     } else if (withItems && !withDiscounts) {
+      console.log('this one');
       const [userWishlistsWithItems, userWishlistsWithItemsError] =
         await wishlistRepository.getAllUserWishlistsWithItems(userId);
+
+      const wishlistMapByUUID = new Map<string, any>();
 
       if (userWishlistsWithItemsError) {
         logger.error(userWishlistsWithItemsError);
