@@ -128,18 +128,56 @@ class WishlistRepository {
     }
   }
 
-  public async getAllUserWishlistsWithItems(
+  public async getAllUserWishlistsWithItemsAnd(
     userId: string
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
   > {
     try {
-      const query = `
-        SELECT w.*, wi.*
-        FROM wishlists w
-        JOIN wishlist_items wi ON w.id = wi.wishlist_id
-        WHERE w.wishlist_user_id = $1
-      `;
+      const query = `SELECT w.id as wishlist_id, 
+       w.name as wishlist_name, 
+       w.wishlist_url,
+       w.monitored,
+       w.initialized,
+       w.update_frequency,
+       w.created_at as created_at,
+       w.last_updated_at as last_updated_at,
+       array_agg(
+            jsonb_build_object(
+                'id', wi.id,
+                'marketplace_item_title', wi.marketplace_item_title,
+                'marketplace_item_maker', wi.marketplace_item_maker,
+                'marketplace_item_original_price', wi.marketplace_item_original_price,
+                'marketplace_item_href', wi.marketplace_item_href,
+                'marketplace_item_image_url', wi.marketplace_item_image_url,
+                'referral_link', wi.referral_link, 
+                'item_latest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                ),
+                'item_lowest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.price ASC
+                    LIMIT 1
+                ),
+                'current_discount_percentage', (
+                    SELECT ph.discount_percentage
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                )
+            )
+       ) as wishlist_items
+FROM wishlists w
+JOIN wishlist_items wi ON w.id = wi.wishlist_id
+WHERE w.wishlist_user_id = $1
+GROUP BY w.id;`;
       const res = await this.pool.query(query, [userId]);
       return Promise.resolve([res.rows, null]);
     } catch (error) {
@@ -147,63 +185,110 @@ class WishlistRepository {
     }
   }
 
-  public async getAllUserWishlistsWithItemsAndRecords(
+  public async getAllUserWishlistsWithItemsAndDiscounts(
     userId: string
-  ): Promise<
-    Database['public']['Tables']['wishlists']['Row'][] | PostgrestError
-  > {
+  ): Promise<[WishlistWithItemsWithPriceInfo[], PostgrestError]> {
     try {
-      const query = `
-        SELECT w.*, wi.*, ph.*
-        FROM wishlists w
-        JOIN wishlist_items wi ON w.id = wi.wishlist_id
-        JOIN (
-          SELECT item_id, MAX(created_at) AS latest_created_at
-          FROM price_history
-          GROUP BY item_id
-        ) latest_ph ON wi.id = latest_ph.item_id
-        JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
-        WHERE w.wishlist_user_id = $1
-      `;
+      const query = `SELECT w.id as wishlist_id, 
+       w.name as wishlist_name, 
+       w.wishlist_url,
+       w.monitored,
+       w.initialized,
+       w.update_frequency,
+       w.created_at as created_at,
+       w.last_updated_at as last_updated_at,
+       array_agg(
+            jsonb_build_object(
+                'id', wi.id,
+                'marketplace_item_title', wi.marketplace_item_title,
+                'marketplace_item_maker', wi.marketplace_item_maker,
+                'marketplace_item_original_price', wi.marketplace_item_original_price,
+                'marketplace_item_href', wi.marketplace_item_href,
+                'marketplace_item_image_url', wi.marketplace_item_image_url,
+                'referral_link', wi.referral_link, 
+                'item_latest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                ),
+                'item_lowest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.price ASC
+                    LIMIT 1
+                ),
+                'current_discount_percentage', (
+                    SELECT ph.discount_percentage
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                )
+            )
+       ) as wishlist_items
+FROM wishlists w
+JOIN wishlist_items wi ON w.id = wi.wishlist_id
+WHERE w.wishlist_user_id = '553c9eca-29ee-4141-ae31-74ad4d2a2c10'
+GROUP BY w.id;
+`;
       const res = await this.pool.query(query, [userId]);
-      return Promise.resolve(res.rows);
+      return Promise.resolve([res.rows, null]);
     } catch (error) {
-      return Promise.resolve(error);
+      return Promise.resolve([null, error]);
     }
   }
 
-  public async getWishlistItemsAndDiscounts(wishlistId: string): Promise<
-    {
-      created_at: string | null;
-      id: string;
-      last_updated_at: string | null;
-      marketplace_item_href: string;
-      marketplace_item_id: string;
-      marketplace_item_image_url: string | null;
-      marketplace_item_maker: string;
-      marketplace_item_original_price: number | null;
-      marketplace_item_title: string;
-      monitored: boolean;
-      referral_link: string | null;
-      update_frequency: string | null;
-      wishlist_id: string;
-      discount_percentage: number | null;
-      item_id: string | null;
-      price: number;
-    }[]
-  > {
+  public async getWishlistItemsAndDiscounts(
+    wishlistId: string
+  ): Promise<WishlistWithItemsWithPriceInfo> {
     try {
-      const query = `
-        SELECT wi.*, ph.*
-        FROM wishlist_items wi
-        JOIN (
-          SELECT item_id, MAX(created_at) AS latest_created_at
-          FROM price_history
-          GROUP BY item_id
-        ) latest_ph ON wi.id = latest_ph.item_id
-        JOIN price_history ph ON latest_ph.item_id = ph.item_id AND latest_ph.latest_created_at = ph.created_at
-        WHERE wi.wishlist_id = $1
-      `;
+      const query = `SELECT w.id as wishlist_id, 
+       w.name as wishlist_name, 
+       w.wishlist_url,
+       w.monitored,
+       w.initialized,
+       w.update_frequency,
+       w.created_at as created_at,
+       w.last_updated_at as last_updated_at,
+       array_agg(
+            jsonb_build_object(
+                'id', wi.id,
+                'marketplace_item_title', wi.marketplace_item_title,
+                'marketplace_item_maker', wi.marketplace_item_maker,
+                'marketplace_item_original_price', wi.marketplace_item_original_price,
+                'marketplace_item_href', wi.marketplace_item_href,
+                'marketplace_item_image_url', wi.marketplace_item_image_url,
+                'referral_link', wi.referral_link, 
+                'item_latest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                ),
+                'item_lowest_price', (
+                    SELECT ph.price
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.price ASC
+                    LIMIT 1
+                ),
+                'current_discount_percentage', (
+                    SELECT ph.discount_percentage
+                    FROM price_history ph
+                    WHERE ph.item_id = wi.id
+                    ORDER BY ph.created_at DESC
+                    LIMIT 1
+                )
+            )
+       ) as wishlist_items
+      FROM wishlists w
+      JOIN wishlist_items wi ON w.id = wi.wishlist_id
+      WHERE w.id = $1
+      GROUP BY w.id;`;
       const res = await this.pool.query(query, [wishlistId]);
       return Promise.resolve(res.rows);
     } catch (error) {
@@ -212,5 +297,30 @@ class WishlistRepository {
     }
   }
 }
+
+type WishlistItem = {
+  id: string;
+  marketplace_item_title: string;
+  marketplace_item_maker: string;
+  marketplace_item_original_price: number;
+  marketplace_item_href: string;
+  marketplace_item_image_url: string;
+  referral_link: string;
+  item_latest_price: number;
+  item_lowest_price: number;
+  current_discount_percentage: number;
+};
+
+type WishlistWithItemsWithPriceInfo = {
+  wishlist_id: string;
+  wishlist_name: string;
+  wishlist_url: string;
+  monitored: boolean;
+  initialized: boolean;
+  update_frequency: number;
+  created_at: string;
+  last_updated_at: string;
+  wishlist_items: WishlistItem[];
+};
 
 export { WishlistRepository };

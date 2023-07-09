@@ -22,6 +22,11 @@ wishlistRouter.get(
 );
 
 wishlistRouter.get(
-  `/user/:userId`,
+  `/user/:userId/discounts`,
+  wishlistController.handleGetAllUserWishlistCurrentDiscounts
+);
+
+wishlistRouter.get(
+  `/user/:userId/wishlists`,
   wishlistController.handleGetAllUserWishlists
 );

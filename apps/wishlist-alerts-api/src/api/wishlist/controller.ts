@@ -6,6 +6,7 @@ import { AuthService } from '../../lib/auth';
 import { NextFunction, Request, Response } from 'express';
 import winston from 'winston';
 import { WishlistItemRepository } from '../wishlistItem/repository';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
@@ -338,16 +339,45 @@ class WishlistController {
 
     const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
 
-    logger.info(`received request: GET /api/v1/wishlists/user/${userId}`);
+    logger.info(
+      `received request: GET /api/v1/wishlists/user/${userId}/wishlists`
+    );
 
-    const [userWishlists, fetchWishlistsError] =
-      await wishlistService.getAllUserWishlists(userId);
+    const [userWishlists, userWishlistsError] =
+      await wishlistService.getAllUserWishlistsWithItemsAndDiscounts(userId);
 
-    if (fetchWishlistsError) {
-      logger.error(fetchWishlistsError);
-      res.status(500).json({ error: fetchWishlistsError });
+    if (userWishlistsError) {
+      res.status(500).json({ error: `Unable to fetch user wishlists` });
     }
-    res.status(200).json({ wishlists: userWishlists });
+
+    const userWishlistsWithFilteredDiscounts = userWishlists.map((wishlist) => {
+      return {
+        wishlistId: wishlist.wishlist_id,
+        wishlistUrl: wishlist.wishlist_url,
+        wishlistTitle: wishlist.wishlist_name,
+        monitored: wishlist.monitored,
+        updateFrequency: wishlist.update_frequency,
+        initialized: wishlist.initialized,
+        createdAt: wishlist.created_at,
+        lastUpdatedAt: wishlist.last_updated_at,
+        wishlistItems: wishlist.wishlist_items,
+        discountedItems: wishlist.wishlist_items
+          .filter((item) => item.current_discount_percentage > 20)
+          .sort(
+            (a, b) =>
+              b.current_discount_percentage - a.current_discount_percentage
+          ),
+      };
+    });
+    res.status(200).json(userWishlistsWithFilteredDiscounts);
+  }
+
+  async handleGetAllUserWishlistCurrentDiscounts(req: Request, res: Response) {
+    const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
+
+    logger.info(
+      `received request: GET /api/v1/wishlists/user/${userId}/discounts`
+    );
   }
 }
 

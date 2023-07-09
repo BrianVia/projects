@@ -463,59 +463,39 @@ class WishlistService {
     });
   }
 
-  public async getAllUserWishlists(
-    userId: string,
-    withItems = true,
-    withDiscounts = false
-  ): Promise<[any, PostgrestError?]> {
-    if (withDiscounts) {
-      const [userWishlists, userWishlistsError] =
-        await wishlistRepository.getAllUserWishlists(userId);
+  public async getAllUserWishlistsWithItemsAndDiscounts(
+    userId: string
+  ): Promise<[WishlistWithItemsWithPriceInfo[], PostgrestError]> {
+    const [userWishlists, userWishlistsError] =
+      await wishlistRepository.getAllUserWishlistsWithItemsAndDiscounts(userId);
 
-      logger.info(`got user wishlists:`);
-      logger.info(userWishlists.map((wishlist) => wishlist.name).join(', '));
-
-      if (userWishlistsError) {
-        logger.error(userWishlistsError);
-        Promise.reject(userWishlistsError);
-      }
-
-      const userWishlistsWithItemsAndDiscounts = [];
-      for (const wishlist of userWishlists) {
-        const wishlistData =
-          await wishlistRepository.getWishlistItemsAndDiscounts(wishlist.id);
-
-        userWishlistsWithItemsAndDiscounts.push(wishlistData);
-      }
-
-      return Promise.resolve([userWishlistsWithItemsAndDiscounts]);
-    } else if (withItems && !withDiscounts) {
-      console.log('this one');
-      const [userWishlistsWithItems, userWishlistsWithItemsError] =
-        await wishlistRepository.getAllUserWishlistsWithItems(userId);
-
-      const wishlistMapByUUID = new Map<string, any>();
-
-      if (userWishlistsWithItemsError) {
-        logger.error(userWishlistsWithItemsError);
-        Promise.reject(userWishlistsWithItemsError);
-      }
-
-      return Promise.resolve([
-        userWishlistsWithItems,
-        userWishlistsWithItemsError,
-      ]);
-    } else {
-      const [userWishlists, userWishlistsError] =
-        await wishlistRepository.getAllUserWishlists(userId);
-
-      if (userWishlistsError) {
-        logger.error(userWishlistsError);
-        Promise.reject(userWishlistsError);
-      }
-      return Promise.resolve([userWishlists, userWishlistsError]);
-    }
+    return Promise.resolve([userWishlists, userWishlistsError]);
   }
 }
+
+type WishlistItem = {
+  id: string;
+  marketplace_item_title: string;
+  marketplace_item_maker: string;
+  marketplace_item_original_price: number;
+  marketplace_item_href: string;
+  marketplace_item_image_url: string;
+  referral_link: string;
+  item_latest_price: number;
+  item_lowest_price: number;
+  current_discount_percentage: number;
+};
+
+type WishlistWithItemsWithPriceInfo = {
+  wishlist_id: string;
+  wishlist_name: string;
+  wishlist_url: string;
+  monitored: boolean;
+  initialized: boolean;
+  update_frequency: number;
+  created_at: string;
+  last_updated_at: string;
+  wishlist_items: WishlistItem[];
+};
 
 export { WishlistService };
