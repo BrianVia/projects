@@ -1,9 +1,6 @@
 import { Router } from 'express';
 import cors from 'cors';
 import { WishlistController } from './controller';
-import { Logger } from '@common/logger';
-import { WishlistService } from './service';
-import { AuthService } from '../../lib/auth';
 
 const wishlistController = new WishlistController();
 

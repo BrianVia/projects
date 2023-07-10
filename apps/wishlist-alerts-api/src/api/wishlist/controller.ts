@@ -11,7 +11,6 @@ import { PostgrestError } from '@supabase/supabase-js';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'wishlist-alerts-api' },
   transports: [
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
     new winston.transports.File({ filename: 'combined.log' }),
@@ -344,6 +343,7 @@ class WishlistController {
     logger.info(
       `received request: GET /api/v1/wishlists/user/${userId}/wishlists`
     );
+    console.log('here 2');
 
     const [userWishlists, userWishlistsError] =
       await wishlistService.getAllUserWishlistsWithItemsAndDiscounts(userId);
@@ -377,6 +377,8 @@ class WishlistController {
   async handleGetAllUserWishlistCurrentDiscounts(req: Request, res: Response) {
     const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
 
+    console.log('here');
+
     logger.info(
       `received request: GET /api/v1/wishlists/user/${userId}/discounts`
     );
@@ -409,7 +411,7 @@ class WishlistController {
           ),
       };
     });
-    res.status(200).json(userWishlistsWithOnlyDiscounts);
+    return res.status(200).json(userWishlistsWithOnlyDiscounts);
   }
 }
 

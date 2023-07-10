@@ -13,7 +13,6 @@ import { WishlistWithItemsWithPriceInfo } from '../../types';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'wishlist-alerts-api' },
 });
 //
 // If we're not in production then log to the `console` with the format:

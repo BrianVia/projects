@@ -24,7 +24,6 @@ app.use(express.json());
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'wishlist-alerts-api' },
 });
 //
 // If we're not in production then log to the `console` with the format:
@@ -51,5 +50,6 @@ const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   logger.info(`Listening at http://localhost:${port}/api`);
 });
+console.log('Listening on port 8080');
 
 server.on('error', logger.error);

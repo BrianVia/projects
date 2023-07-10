@@ -4,7 +4,6 @@ import { supabase } from '../supabase';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'wishlist-alerts-api' },
 });
 
 class AuthService {
