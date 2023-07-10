@@ -468,8 +468,12 @@ class WishlistService {
   ): Promise<[WishlistWithItemsWithPriceInfo[], PostgrestError]> {
     const [userWishlists, userWishlistsError] =
       await wishlistRepository.getAllUserWishlistsWithItemsAndDiscounts(userId);
+    if (userWishlistsError) {
+      logger.error(userWishlistsError);
+      return Promise.reject([null, userWishlistsError]);
+    }
 
-    return Promise.resolve([userWishlists, userWishlistsError]);
+    return Promise.resolve([userWishlists, null]);
   }
 }
 

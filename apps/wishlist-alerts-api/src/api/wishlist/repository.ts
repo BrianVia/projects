@@ -230,13 +230,14 @@ GROUP BY w.id;`;
        ) as wishlist_items
 FROM wishlists w
 JOIN wishlist_items wi ON w.id = wi.wishlist_id
-WHERE w.wishlist_user_id = '553c9eca-29ee-4141-ae31-74ad4d2a2c10'
+WHERE w.wishlist_user_id = $1
 GROUP BY w.id;
 `;
       const res = await this.pool.query(query, [userId]);
       return Promise.resolve([res.rows, null]);
     } catch (error) {
-      return Promise.resolve([null, error]);
+      logger.error(error);
+      return Promise.reject([null, error]);
     }
   }
 

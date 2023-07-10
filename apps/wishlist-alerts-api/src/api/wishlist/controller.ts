@@ -394,7 +394,7 @@ class WishlistController {
     const [userWishlists, userWishlistsError] =
       await wishlistService.getAllUserWishlistsWithItemsAndDiscounts(userId);
 
-    if (userWishlistsError) {
+    if (userWishlistsError !== null) {
       res.status(500).json({ error: `Unable to fetch user wishlists` });
     }
 
