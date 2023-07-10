@@ -257,6 +257,7 @@ class WishlistController {
     });
   }
 
+  // TODO - Rewrite with easier query
   async handleGetWishlistCurrentDiscounts(
     req: Request,
     res: Response,
@@ -315,6 +316,7 @@ class WishlistController {
     res.status(200).json({ discountedItems: finalDiscountedItems });
   }
 
+  // TODO - Write this or maybe just get rid of it
   async handleAnalyzeAllWishlists(
     req: Request,
     res: Response,
@@ -378,6 +380,36 @@ class WishlistController {
     logger.info(
       `received request: GET /api/v1/wishlists/user/${userId}/discounts`
     );
+    // const token = req.headers.authorization;
+    // const tokenUser = await authService.getTokenUser(token);
+    // if (tokenUser) {
+    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    // } else {
+    //   logger.warn(`token user not found`);
+    //   res.status(401).send('Unauthorized');
+    // }
+
+    const [userWishlists, userWishlistsError] =
+      await wishlistService.getAllUserWishlistsWithItemsAndDiscounts(userId);
+
+    if (userWishlistsError) {
+      res.status(500).json({ error: `Unable to fetch user wishlists` });
+    }
+
+    const userWishlistsWithOnlyDiscounts = userWishlists.map((wishlist) => {
+      return {
+        wishlistId: wishlist.wishlist_id,
+        wishlistUrl: wishlist.wishlist_url,
+        wishlistTitle: wishlist.wishlist_name,
+        discountedItems: wishlist.wishlist_items
+          .filter((item) => item.current_discount_percentage > 20)
+          .sort(
+            (a, b) =>
+              b.current_discount_percentage - a.current_discount_percentage
+          ),
+      };
+    });
+    res.status(200).json(userWishlistsWithOnlyDiscounts);
   }
 }
 
