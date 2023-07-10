@@ -20,8 +20,9 @@ wishlistRouter.get(
 
 wishlistRouter.get(
   `/user/:userId/discounts`,
-  wishlistController.handleGetAllUserWishlistCurrentDiscounts
+  wishlistController.handleGetAllUserDiscounts
 );
+//TODO MOVE TO A USER CONTROLLER PERHAPS
 
 wishlistRouter.get(
   `/user/:userId/wishlists`,

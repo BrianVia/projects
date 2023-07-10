@@ -369,7 +369,8 @@ class WishlistController {
     res.status(200).json(userWishlistsWithFilteredDiscounts);
   }
 
-  async handleGetAllUserWishlistCurrentDiscounts(req: Request, res: Response) {
+  // TODO move to a new function in the wishlistService to get all current discounts for a user
+  async handleGetAllUserDiscounts(req: Request, res: Response) {
     const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
 
     logger.info(
@@ -391,22 +392,17 @@ class WishlistController {
       res.status(500).json({ error: `Unable to fetch user wishlists` });
     }
 
-    const userWishlistsWithOnlyDiscounts = userWishlists
+    const allUserDiscountedItems = userWishlists
       .map((wishlist) => {
-        return {
-          wishlistId: wishlist.wishlist_id,
-          wishlistUrl: wishlist.wishlist_url,
-          wishlistTitle: wishlist.wishlist_name,
-          discountedItems: wishlist.wishlist_items
-            .filter((item) => item.current_discount_percentage > 20)
-            .sort(
-              (a, b) =>
-                b.current_discount_percentage - a.current_discount_percentage
-            ),
-        };
+        return wishlist.wishlist_items.filter(
+          (item) => item.current_discount_percentage > 20
+        );
       })
-      .filter((userWishlists) => userWishlists.discountedItems.length > 0);
-    return res.status(200).json(userWishlistsWithOnlyDiscounts);
+      .flat()
+      .sort(
+        (a, b) => b.current_discount_percentage - a.current_discount_percentage
+      );
+    return res.status(200).json(allUserDiscountedItems);
   }
 }
 
