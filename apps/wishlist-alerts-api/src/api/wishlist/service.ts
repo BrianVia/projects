@@ -9,6 +9,7 @@ import { WishlistItemRepository } from '../wishlistItem/repository';
 import { WishlistItemService } from '../wishlistItem';
 
 import winston from 'winston';
+import { WishlistWithItemsWithPriceInfo } from '../../types';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
@@ -472,30 +473,5 @@ class WishlistService {
     return Promise.resolve([userWishlists, userWishlistsError]);
   }
 }
-
-type WishlistItem = {
-  id: string;
-  marketplace_item_title: string;
-  marketplace_item_maker: string;
-  marketplace_item_original_price: number;
-  marketplace_item_href: string;
-  marketplace_item_image_url: string;
-  referral_link: string;
-  item_latest_price: number;
-  item_lowest_price: number;
-  current_discount_percentage: number;
-};
-
-type WishlistWithItemsWithPriceInfo = {
-  wishlist_id: string;
-  wishlist_name: string;
-  wishlist_url: string;
-  monitored: boolean;
-  initialized: boolean;
-  update_frequency: number;
-  created_at: string;
-  last_updated_at: string;
-  wishlist_items: WishlistItem[];
-};
 
 export { WishlistService };
