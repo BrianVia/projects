@@ -275,6 +275,18 @@ class WishlistService {
     return Promise.resolve([data, error]);
   }
 
+  public async getWishlistAndItemsByWishlistId(
+    wishlistId: string
+  ): Promise<[WishlistWithItemsWithPriceInfo, PostgrestError]> {
+    const [wishlist, wishlistError] =
+      await wishlistRepository.getWishlistItemsAndDiscounts(wishlistId);
+    if (wishlistError) {
+      logger.error(wishlistError);
+      return Promise.reject([null, wishlistError]);
+    }
+    return Promise.resolve([wishlist, null]);
+  }
+
   public async withlistBelongsToUser(
     wishlistId: string,
     userId: string

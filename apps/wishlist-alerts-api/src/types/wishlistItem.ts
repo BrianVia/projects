@@ -1,4 +1,4 @@
-export interface WishlistItem  {
+export interface WishlistItemWithPriceInfo {
   id: string;
   marketplace_item_title: string;
   marketplace_item_maker: string;
@@ -9,9 +9,9 @@ export interface WishlistItem  {
   item_latest_price: number;
   item_lowest_price: number;
   current_discount_percentage: number;
-};
+}
 
-export interface WishlistWithItemsWithPriceInfo  {
+export interface WishlistWithItemsWithPriceInfo {
   wishlist_id: string;
   wishlist_name: string;
   wishlist_url: string;
@@ -20,8 +20,8 @@ export interface WishlistWithItemsWithPriceInfo  {
   update_frequency: number;
   created_at: string;
   last_updated_at: string;
-  wishlist_items: WishlistItem[];
-};
+  wishlist_items: WishlistItemWithPriceInfo[];
+}
 
 export interface ParsedWishlistItem {
   itemId: string;

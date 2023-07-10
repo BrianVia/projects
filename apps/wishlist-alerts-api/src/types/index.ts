@@ -1,6 +1,6 @@
 export {
   ParsedWishlistItem,
-  WishlistItem,
+  WishlistItemWithPriceInfo,
   WishlistWithItemsWithPriceInfo,
 } from './wishlistItem';
 export * from './supabase';

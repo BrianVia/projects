@@ -8,6 +8,7 @@ import { Database } from '../../types/supabase';
 import { Pool } from 'pg';
 
 import winston from 'winston';
+import { WishlistWithItemsWithPriceInfo } from '../../types';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
@@ -127,7 +128,7 @@ class WishlistRepository {
     }
   }
 
-  public async getAllUserWishlistsWithItemsAnd(
+  public async getAllUserWishlistsWithItemsAndPriceInformation(
     userId: string
   ): Promise<
     [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
@@ -243,7 +244,7 @@ GROUP BY w.id;
 
   public async getWishlistItemsAndDiscounts(
     wishlistId: string
-  ): Promise<WishlistWithItemsWithPriceInfo> {
+  ): Promise<[WishlistWithItemsWithPriceInfo, PostgrestError]> {
     try {
       const query = `SELECT w.id as wishlist_id, 
        w.name as wishlist_name, 
@@ -288,39 +289,19 @@ GROUP BY w.id;
       FROM wishlists w
       JOIN wishlist_items wi ON w.id = wi.wishlist_id
       WHERE w.id = $1
-      GROUP BY w.id;`;
+      GROUP BY w.id
+      LIMIT 1;`;
       const res = await this.pool.query(query, [wishlistId]);
-      return Promise.resolve(res.rows);
+      
+      return Promise.resolve([
+        res.rows[0] as WishlistWithItemsWithPriceInfo,
+        null,
+      ]);
     } catch (error) {
       logger.error('Error executing query:', error);
-      return Promise.reject(error);
+      return Promise.reject([null, error]);
     }
   }
 }
-
-type WishlistItem = {
-  id: string;
-  marketplace_item_title: string;
-  marketplace_item_maker: string;
-  marketplace_item_original_price: number;
-  marketplace_item_href: string;
-  marketplace_item_image_url: string;
-  referral_link: string;
-  item_latest_price: number;
-  item_lowest_price: number;
-  current_discount_percentage: number;
-};
-
-type WishlistWithItemsWithPriceInfo = {
-  wishlist_id: string;
-  wishlist_name: string;
-  wishlist_url: string;
-  monitored: boolean;
-  initialized: boolean;
-  update_frequency: number;
-  created_at: string;
-  last_updated_at: string;
-  wishlist_items: WishlistItem[];
-};
 
 export { WishlistRepository };
