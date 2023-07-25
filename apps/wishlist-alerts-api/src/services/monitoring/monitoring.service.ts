@@ -30,7 +30,9 @@ class MonitoringService {
 
     // get all wishlists
     const [allWishlists, allWishlistsError] =
-      await wishlistRepository.getAllWishlists();
+      await wishlistRepository.getAllWishlistsByUpdateFrequency(
+        updateFrequency
+      );
 
     const allDonePromises = [];
     for (const wishlist of allWishlists) {

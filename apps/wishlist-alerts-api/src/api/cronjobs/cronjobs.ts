@@ -33,12 +33,12 @@ export class cronjobs {
       }
     });
 
-    // cron.schedule('0 * * * *', async () => {
-    //   logger.info(`Hourly cron job running at ${new Date().toLocaleString()}`);
-    //   const ranDaily = await monitoringService.monitorWishlists('hourly');
-    //   if (ranDaily) {
-    //     logger.info('Daily cron job ran at ' + new Date().toLocaleString());
-    //   }
-    // });
+    cron.schedule('0 * * * *', async () => {
+      logger.info(`Hourly cron job running at ${new Date().toLocaleString()}`);
+      const ranDaily = await monitoringService.monitorWishlists('hourly');
+      if (ranDaily) {
+        logger.info('Daily cron job ran at ' + new Date().toLocaleString());
+      }
+    });
   }
 }

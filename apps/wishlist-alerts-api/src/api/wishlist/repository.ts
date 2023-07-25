@@ -9,6 +9,7 @@ import { Pool } from 'pg';
 
 import winston from 'winston';
 import { WishlistWithItemsWithPriceInfo } from '../../types';
+import { UpdateFrequency } from '../../types/updateFrequency';
 const logger = winston.createLogger({
   level: process.env.WISHLIST_ALERTS_LOG_LEVEL || 'info',
   format: winston.format.json(),
@@ -46,6 +47,20 @@ class WishlistRepository {
     try {
       const query = 'SELECT * FROM wishlists';
       const res = await this.pool.query(query);
+      return Promise.resolve([res.rows, null]);
+    } catch (error) {
+      return Promise.reject([null, error]);
+    }
+  }
+
+  public async getAllWishlistsByUpdateFrequency(
+    updateFrequency: UpdateFrequency
+  ): Promise<
+    [Database['public']['Tables']['wishlists']['Row'][], PostgrestError]
+  > {
+    try {
+      const query = 'SELECT * FROM wishlists WHERE update_frequency = $1';
+      const res = await this.pool.query(query, [updateFrequency]);
       return Promise.resolve([res.rows, null]);
     } catch (error) {
       return Promise.reject([null, error]);
@@ -292,7 +307,7 @@ GROUP BY w.id;
       GROUP BY w.id
       LIMIT 1;`;
       const res = await this.pool.query(query, [wishlistId]);
-      
+
       return Promise.resolve([
         res.rows[0] as WishlistWithItemsWithPriceInfo,
         null,
