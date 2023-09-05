@@ -1,0 +1,74 @@
+{
+  "name": "wishlist-alerts-user-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/wishlist-alerts-user-ui/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/wishlist-alerts-user-ui"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/vite:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "wishlist-alerts-user-ui:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "wishlist-alerts-user-ui:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "wishlist-alerts-user-ui:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "preview": {
+      "executor": "@nrwl/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "wishlist-alerts-user-ui:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "wishlist-alerts-user-ui:build:development"
+        },
+        "production": {
+          "buildTarget": "wishlist-alerts-user-ui:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nrwl/vite:test",
+      "outputs": ["coverage/apps/wishlist-alerts-user-ui"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/wishlist-alerts-user-ui"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/wishlist-alerts-user-ui/**/*.{ts,tsx,js,jsx}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

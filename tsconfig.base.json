@@ -15,9 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@common/logger": ["libs/logger/src/index.ts"],
       "@wordly-domains/data": ["libs/data/src/index.ts"],
-      "@wordly-domains/email": ["libs/email/src/index.ts"],
-      "@common/logger": ["libs/logger/src/index.ts"]
+      "@wordly-domains/email": ["libs/email/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
