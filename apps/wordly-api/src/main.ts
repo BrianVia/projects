@@ -31,6 +31,6 @@ app.use('/api/v1/domains', domainRouter);
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
-  logger.info(`Listening at http://localhost:${port}/api`);
+  console.log(`Listening at http://localhost:${port}/api`);
 });
 server.on('error', logger.error);

@@ -9,11 +9,11 @@ class UserController {
   async handleUserGet(req, res, next) {
     const userId = req.params.userId;
 
-    logger.info(`received request: GET /api/v1/user/${userId}`);
+    console.log(`received request: GET /api/v1/user/${userId}`);
     const token = req.headers.authorization;
     const tokenUser = await getTokenUser(token);
     if (tokenUser) {
-      logger.debug(`token user found: ${tokenUser?.id}`);
+      console.debug(`token user found: ${tokenUser?.id}`);
     } else {
       logger.warn(`token user not found`);
       res.status(401).send('Unauthorized');
@@ -25,12 +25,12 @@ class UserController {
     }
 
     const { profile, error } = await fetchUserProfile(userId);
-    logger.debug(`got user profile: ${profile}`);
+    console.debug(`got user profile: ${profile}`);
     if (error) {
       logger.error(error.toString());
       res.status(500).send(error);
     }
-    logger.debug(`Retrieved profile for ${userId}: ${JSON.stringify(profile)}`);
+    console.debug(`Retrieved profile for ${userId}: ${JSON.stringify(profile)}`);
 
     res.status(200).json({
       id: tokenUser.id,
@@ -44,13 +44,13 @@ class UserController {
   async handleWordPreferencesUpdate(req, res, next) {
     // update the user's profile with the request word preferences
     const userId = req.params.userId;
-    logger.info(
+    console.log(
       `received request: POST /api/v1/user/${userId}/wordPreferences`
     );
     const token = req.headers.authorization;
     const tokenUser = await getTokenUser(token);
     if (tokenUser) {
-      logger.debug(`token user found: ${tokenUser?.id}`);
+      console.debug(`token user found: ${tokenUser?.id}`);
     } else {
       logger.warn(`token user not found`);
       res.status(401).send('Unauthorized');
@@ -81,11 +81,11 @@ class UserController {
   async handleSubscriptionUpdate(req, res, next) {
     const newSubscriptionValue: boolean = req.body.activeSubscription;
     const userId: string = req.params.userId;
-    logger.info(`received request: POST /api/v1/user/${userId}/subscription`);
+    console.log(`received request: POST /api/v1/user/${userId}/subscription`);
     const token = req.headers.authorization;
     const tokenUser = await getTokenUser(token);
     if (tokenUser) {
-      logger.debug(`token user found: ${tokenUser?.id}`);
+      console.debug(`token user found: ${tokenUser?.id}`);
     } else {
       logger.warn(`token user not found`);
       res.status(401).send('Unauthorized');

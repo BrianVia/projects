@@ -41,14 +41,14 @@ app.use('/api/v1/wishlist', wishlistRouter);
 
 const cronHandler = new cronjobs();
 
-logger.info('Cron jobs scheduled to run...');
+console.log('Cron jobs scheduled to run...');
 cronHandler.scheduleJobs();
 
 // monitoringService.monitorWishlists('daily'); // Just run at startup in the meantime
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
-  logger.info(`Listening at http://localhost:${port}/api`);
+  console.log(`Listening at http://localhost:${port}/api`);
 });
 console.log('Listening on port 8080');
 

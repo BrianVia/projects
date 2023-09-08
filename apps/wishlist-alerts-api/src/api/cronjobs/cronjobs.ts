@@ -23,21 +23,21 @@ if (process.env.NODE_ENV !== 'production') {
 
 export class cronjobs {
   scheduleJobs() {
-    logger.info('Scheduling cron jobs...');
+    console.log('Scheduling cron jobs...');
 
-    logger.info('Monitoring Wishlists Daily at Midnight EST');
+    console.log('Monitoring Wishlists Daily at Midnight EST');
     cron.schedule(`0 0 * * *`, async () => {
       const ranDaily = await monitoringService.monitorWishlists('daily');
       if (ranDaily) {
-        logger.info('Daily cron job ran at ' + new Date().toLocaleString());
+        console.log('Daily cron job ran at ' + new Date().toLocaleString());
       }
     });
 
     cron.schedule('0 * * * *', async () => {
-      logger.info(`Hourly cron job running at ${new Date().toLocaleString()}`);
+      console.log(`Hourly cron job running at ${new Date().toLocaleString()}`);
       const ranDaily = await monitoringService.monitorWishlists('hourly');
       if (ranDaily) {
-        logger.info('Daily cron job ran at ' + new Date().toLocaleString());
+        console.log('Daily cron job ran at ' + new Date().toLocaleString());
       }
     });
   }

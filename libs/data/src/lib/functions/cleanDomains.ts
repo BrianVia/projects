@@ -6,8 +6,8 @@ import 'dotenv/config';
 export async function cleanDomains() {
   const logger = new Logger();
 
-  logger.info('Removing domains');
-  logger.debug(
+  console.log('Removing domains');
+  console.debug(
     `Removing domains prior to ${getLastWeeksDate()
       .toISOString()
       .replace(/T.*/, '')}`

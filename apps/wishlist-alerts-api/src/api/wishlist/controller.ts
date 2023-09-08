@@ -41,11 +41,11 @@ export interface InsertPriceHistoryRecordPartialPayload {
 
 class WishlistController {
   async handlePostNewWishlist(req: Request, res: Response) {
-    logger.info(`received request: POST /api/v1/wishlist/new`);
+    console.log(`received request: POST /api/v1/wishlist/new`);
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
     // if (tokenUser) {
-    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    //   console.debug(`token user found: ${tokenUser?.id}`);
     // } else {
     //   logger.warn(`token user not found`);
     //   res.status(401).send('Unauthorized');
@@ -58,7 +58,7 @@ class WishlistController {
     }
 
     const addAllItems: boolean = req.body.addAllItems as boolean;
-    logger.debug(`wishlistUrl: ${wishlistUrl}`);
+    console.debug(`wishlistUrl: ${wishlistUrl}`);
     const wishlistData = await wishlistService.parseWishlist(wishlistUrl);
 
     // Find if wishlsit already exists
@@ -66,13 +66,13 @@ class WishlistController {
       await wishlistService.fetchWishlistByUrl(wishlistUrl);
 
     if (existingWishlistData !== null) {
-      logger.info(`wishlist already exists in database`);
+      console.log(`wishlist already exists in database`);
       //insert any new items if needed
       // update any wishlist properties?
 
       return res.status(400).json('wishlist already exists');
     } else {
-      logger.info(`wishlist does not exist in database`);
+      console.log(`wishlist does not exist in database`);
       const { data: insertWishlistData, error: insertError } =
         await wishlistService.insertNewWishlist(
           wishlistData.wishlistUrl,
@@ -92,13 +92,13 @@ class WishlistController {
             insertWishlistItems,
             insertWishlistData.id
           );
-        logger.info(insertItemsData);
+        console.log(insertItemsData);
         if (insertItemsError) {
           logger.error(insertItemsError);
           throw insertItemsError;
         }
 
-        logger.info(insertItemsData);
+        console.log(insertItemsData);
 
         const priceHistoryRecords: InsertPriceHistoryRecordPartialPayload[] =
           [];
@@ -121,7 +121,7 @@ class WishlistController {
           logger.error(insertItemPriceHistoryRecordsError);
           throw insertItemPriceHistoryRecordsError;
         }
-        logger.info(
+        console.log(
           `inserted ${insertItemPriceHistoryRecordsData.length} items into the price_history table.`
         );
 
@@ -148,13 +148,13 @@ class WishlistController {
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
     // if (tokenUser) {
-    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    //   console.debug(`token user found: ${tokenUser?.id}`);
     // } else {
     //   logger.warn(`token user not found`);
     //   res.status(401).send('Unauthorized');
     // }
 
-    logger.info(`received request: POST /api/v1/wishlist/items`);
+    console.log(`received request: POST /api/v1/wishlist/items`);
 
     const insertWishlistItems = req.body
       .wishlistItems as Database['public']['Tables']['wishlist_items']['Insert'][];
@@ -174,7 +174,7 @@ class WishlistController {
         wishlistId
       );
 
-    logger.info(insertItemsData);
+    console.log(insertItemsData);
     logger.error(insertItemsError);
 
     res.status(201).json({
@@ -188,14 +188,14 @@ class WishlistController {
     res: Response,
     next: NextFunction
   ) {
-    logger.info(
+    console.log(
       `received request: GET /api/v1/wishlist/${req.params.id}/items`
     );
 
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
     // if (tokenUser) {
-    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    //   console.debug(`token user found: ${tokenUser?.id}`);
     // } else {
     //   logger.warn(`token user not found`);
     //   res.status(401).send('Unauthorized');
@@ -224,7 +224,7 @@ class WishlistController {
   }
 
   async handleWishlistUpdate(req: Request, res: Response, next: NextFunction) {
-    logger.info(`received request: PUT /api/v1/wishlist/:id`);
+    console.log(`received request: PUT /api/v1/wishlist/:id`);
   }
 
   async handleWishlistAnalyzeItems(
@@ -232,7 +232,7 @@ class WishlistController {
     res: Response,
     next: NextFunction
   ) {
-    logger.info(
+    console.log(
       `received request: POST /api/v1/wishlist/${req.params.id}/analyze`
     );
 
@@ -258,7 +258,7 @@ class WishlistController {
 
   // TODO - Rewrite with easier query
   async handleGetWishlistCurrentDiscounts(req: Request, res: Response) {
-    logger.info(
+    console.log(
       `received request: GET /api/v1/wishlist/${req.params.id}/discounts`
     );
 
@@ -267,7 +267,7 @@ class WishlistController {
     const [wishlistItems, wishlistItemsError] =
       await wishlistService.getItemsByWishlistId(wishlistId);
 
-    // logger.info(wishlistItems);
+    // console.log(wishlistItems);
 
     const wishlistItemsMap = new Map<
       string,
@@ -317,7 +317,7 @@ class WishlistController {
     res: Response,
     next: NextFunction
   ) {
-    logger.info('test');
+    console.log('test');
   }
 
   async handleGetAllUserWishlists(
@@ -328,7 +328,7 @@ class WishlistController {
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
     // if (tokenUser) {
-    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    //   console.debug(`token user found: ${tokenUser?.id}`);
     // } else {
     //   logger.warn(`token user not found`);
     //   res.status(401).send('Unauthorized');
@@ -336,7 +336,7 @@ class WishlistController {
 
     const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
 
-    logger.info(
+    console.log(
       `received request: GET /api/v1/wishlists/user/${userId}/wishlists`
     );
 
@@ -373,13 +373,13 @@ class WishlistController {
   async handleGetAllUserDiscounts(req: Request, res: Response) {
     const userId = process.env.WISHLIST_ALERTS_MY_USER_UUID;
 
-    logger.info(
+    console.log(
       `received request: GET /api/v1/wishlists/user/${userId}/discounts`
     );
     // const token = req.headers.authorization;
     // const tokenUser = await authService.getTokenUser(token);
     // if (tokenUser) {
-    //   logger.debug(`token user found: ${tokenUser?.id}`);
+    //   console.debug(`token user found: ${tokenUser?.id}`);
     // } else {
     //   logger.warn(`token user not found`);
     //   res.status(401).send('Unauthorized');

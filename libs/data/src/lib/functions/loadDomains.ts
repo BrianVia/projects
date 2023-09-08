@@ -42,16 +42,16 @@ export async function loadDomains() {
   const newDomains = await filterOutDomainsWeHave(domains);
 
   if (newDomains.length > 0) {
-    logger.info(`Uploading ${newDomains.length} domains`);
+    console.log(`Uploading ${newDomains.length} domains`);
     await upsertDomains(newDomains, supabase);
 
     return new Promise((resolve) => {
-      logger.info('Domains fetched and loaded into DB');
+      console.log('Domains fetched and loaded into DB');
       resolve('Domains fetched and loaded into DB');
     });
   } else {
     return new Promise((resolve) => {
-      logger.info(`No new domains loaded.`);
+      console.log(`No new domains loaded.`);
       resolve('No new domains loaded.');
     });
   }
@@ -66,7 +66,7 @@ async function filterOutDomainsWeHave(
   const newDomains = domains.filter(
     (domain) => !domainNamesWeAlreadyHave.includes(domain.name)
   );
-  logger.info(
+  console.log(
     `Removed ${
       domainNamesWeAlreadyHave.length - newDomains.length
     } domains from insert payload.`
@@ -76,8 +76,8 @@ async function filterOutDomainsWeHave(
 
 async function getAvailableDomains() {
   const availableDomains: Domain[] = [];
-  logger.debug('getAvailableDomains()');
-  logger.debug('querying domains table');
+  console.debug('getAvailableDomains()');
+  console.debug('querying domains table');
   for (let i = 0; i < 4; i++) {
     const { data, error, status } = await supabase
       .from<Domain>('domains')
@@ -88,7 +88,7 @@ async function getAvailableDomains() {
     availableDomains.push(...(data || []));
   }
 
-  logger.debug(`Retrieved ${availableDomains.length} domains from DB`);
+  console.debug(`Retrieved ${availableDomains.length} domains from DB`);
   return availableDomains;
 }
 
@@ -143,8 +143,8 @@ async function upsertDomains(
     });
   if (data) {
     if (LOG_LEVEL === 'DEBUG') {
-      logger.debug('loaded domains');
-      logger.debug(data.toString());
+      console.debug('loaded domains');
+      console.debug(data.toString());
     }
   }
   if (error) {

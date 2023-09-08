@@ -26,7 +26,7 @@ class MonitoringService {
   public async monitorWishlists(
     updateFrequency: UpdateFrequency
   ): Promise<boolean> {
-    logger.info('monitoring wishlists');
+    console.log('monitoring wishlists');
 
     // get all wishlists
     const [allWishlists, allWishlistsError] =
@@ -36,7 +36,7 @@ class MonitoringService {
 
     const allDonePromises = [];
     for (const wishlist of allWishlists) {
-      logger.info(
+      console.log(
         `Time: ${new Date().toLocaleString()} - Analyzing wishlist ${
           wishlist.id
         } - ${wishlist.name}`
@@ -46,7 +46,7 @@ class MonitoringService {
         discountThreshold,
         newItemsFound,
       } = await wishlistService.analyzeWishlistItems(wishlist.id, true);
-      logger.info(
+      console.log(
         `Time: ${new Date().toLocaleString()} -analyzing wishlist ${
           wishlist.id
         } complete.`
@@ -55,7 +55,7 @@ class MonitoringService {
       // TODO send results to user
 
       allDonePromises.push(Promise.resolve(true));
-      logger.info(
+      console.log(
         'All done with wishlist ID: ' + wishlist.id + ' - ' + wishlist.name
       );
     }
@@ -63,7 +63,7 @@ class MonitoringService {
     const allDone = (await Promise.all(allDonePromises)).every(
       (prom) => prom === true
     );
-    logger.info('All monitoring jobs jobs are done');
+    console.log('All monitoring jobs jobs are done');
     return Promise.resolve(allDone);
   }
 }

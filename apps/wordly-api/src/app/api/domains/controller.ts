@@ -8,11 +8,11 @@ const logger = new Logger();
 
 class DomainsController {
   async handleDomainsGet(req, res, next) {
-    logger.info(`received request: GET /api/v1/domains`);
+    console.log(`received request: GET /api/v1/domains`);
     const token = req.headers.authorization;
     const tokenUser = await getTokenUser(token);
     if (tokenUser) {
-      logger.debug(`token user found: ${tokenUser?.id}`);
+      console.debug(`token user found: ${tokenUser?.id}`);
     } else {
       logger.warn(`token user not found`);
       res.status(401).send('Unauthorized');

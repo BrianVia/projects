@@ -52,7 +52,7 @@ class PriceHistoryService {
     data: Database['public']['Tables']['price_history']['Insert'][];
     error: PostgrestError;
   }> {
-    // logger.info('inserting items into price history table');
+    // console.log('inserting items into price history table');
 
     const insertRecordsPayload = items
       .filter(
@@ -62,7 +62,7 @@ class PriceHistoryService {
           !Number.isNaN(item.itemPrice)
       )
       .map((item) => {
-        // logger.info(item);
+        // console.log(item);
         return {
           item_id: item.itemId,
           price: item.itemPrice,
@@ -70,7 +70,7 @@ class PriceHistoryService {
         };
       });
 
-    // logger.info(insertRecordsPayload.filter((item) => item.price === null));
+    // console.log(insertRecordsPayload.filter((item) => item.price === null));
 
     const { data, error } = await supabaseClient
       .from('price_history')
@@ -96,7 +96,7 @@ class PriceHistoryService {
       .limit(1)
       .single();
 
-    if (error) logger.info(itemId, data, error);
+    if (error) console.log(itemId, data, error);
 
     return Promise.resolve([data, error]);
   }
@@ -111,8 +111,8 @@ class PriceHistoryService {
       .select('*')
       .in('item_id', itemIds)
       .order('created_at', { ascending: false });
-    logger.info(data);
-    logger.info(error);
+    console.log(data);
+    console.log(error);
 
     return Promise.resolve([data, error]);
   }

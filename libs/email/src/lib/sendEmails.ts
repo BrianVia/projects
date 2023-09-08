@@ -11,7 +11,7 @@ import 'dotenv/config';
 const logger = new Logger();
 
 export async function sendEmails() {
-  logger.info('Sending emails');
+  console.log('Sending emails');
   const users = await getUsers();
   const profileDataMap = await getUserProfiles();
 
@@ -32,10 +32,10 @@ export async function sendEmails() {
         profile.word_preferences,
         availableDomains
       );
-      logger.debug(`Found domains for ${email}: ${userDomains.length}`);
+      console.debug(`Found domains for ${email}: ${userDomains.length}`);
       if (userDomains.length > 0 && profile.active_subscription) {
         const emailBody = generateEmail(userDomains);
-        logger.debug(`Sending email to ${email}`);
+        console.debug(`Sending email to ${email}`);
         sendGridMailService.send({
           from: 'delivery@wordly.domains',
           to: email,
@@ -77,8 +77,8 @@ async function getUsers() {
 
 async function getAvailableDomains() {
   const availableDomains: Domain[] = [];
-  logger.debug('getAvailableDomains()');
-  logger.debug('querying domains table');
+  console.debug('getAvailableDomains()');
+  console.debug('querying domains table');
   for (let i = 0; i < 4; i++) {
     const { data, error, status } = await supabase
       .from<Domain>('domains')
@@ -89,7 +89,7 @@ async function getAvailableDomains() {
     availableDomains.push(...(data || []));
   }
 
-  logger.debug(`Retrieved ${availableDomains.length} domains from DB`);
+  console.debug(`Retrieved ${availableDomains.length} domains from DB`);
   return availableDomains;
 }
 
