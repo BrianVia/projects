@@ -1,1 +1,0 @@
-export { domainRouter } from './router';
